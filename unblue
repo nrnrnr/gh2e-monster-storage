@@ -1,0 +1,84 @@
+#!/bin/ksh
+
+# Force light blue pixels to white in an image
+# Usage: unblue threshold delta input.jpg output.png
+
+if [[ $# -ne 4 ]]; then
+    print "Usage: unblue threshold delta input.jpg output.png"
+    print "  threshold: minimum blue value to consider (e.g., 215)"
+    print "  delta: how much lower red/green must be compared to blue (e.g., 5)"
+    exit 1
+fi
+
+threshold="$1"
+delta="$2"
+input="$3"
+output="$4"
+
+# Create a temporary Lua script to process the image
+cat > unblue_filter.lua << EOF
+package.path = '/home/nr/src/lua/?.lua;' .. package.path
+
+local threshold = $threshold
+local delta = $delta
+
+-- Read PPM from stdin
+local ppm_data = io.stdin:read("*a")
+
+-- Parse PPM header
+local header_pattern = "^P3%s+(%d+)%s+(%d+)%s+(%d+)%s+"
+local _, header_end, width_str, height_str, maxval_str = ppm_data:find(header_pattern)
+
+if not header_end then
+    error("Invalid PPM format")
+end
+
+local width = tonumber(width_str)
+local height = tonumber(height_str) 
+local maxval = tonumber(maxval_str)
+
+-- Extract pixel data
+local pixel_data = ppm_data:sub(header_end + 1)
+local pixels = {}
+for num in pixel_data:gmatch("%d+") do
+    table.insert(pixels, tonumber(num))
+end
+
+if #pixels ~= width * height * 3 then
+    error(string.format("Expected %d pixels, got %d", width * height * 3, #pixels))
+end
+
+-- Output PPM header
+print("P3")
+print(width, height)
+print(maxval)
+
+-- Process each pixel
+for y = 1, height do
+    for x = 1, width do
+        local idx = ((y-1) * width + (x-1)) * 3 + 1
+        local r, g, b = pixels[idx], pixels[idx+1], pixels[idx+2]
+        
+        -- Check if pixel is light blue (high blue, lower red/green)
+        if b >= threshold and r <= (b - delta) and g <= (b - delta) then
+            -- Force to white
+            r, g, b = maxval, maxval, maxval
+        end
+        
+        print(r, g, b)
+    end
+end
+EOF
+
+# Process the image: JPEG -> PPM -> filter -> PNG
+djpeg "$input" | pnmtoplainpnm | lua unblue_filter.lua | pnmtopng > "$output"
+
+# Clean up
+rm -f unblue_filter.lua
+
+if [[ -f "$output" ]]; then
+    print "Converted $input to $output (threshold=$threshold, delta=$delta)"
+else
+    print "Error: conversion failed"
+    exit 1
+fi
