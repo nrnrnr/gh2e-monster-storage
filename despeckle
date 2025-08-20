@@ -1,0 +1,5 @@
+#!/usr/bin/fish
+
+pbmclean -black -minneighbors=$argv[1] -extended $argv[2] |
+pbmclean -white -minneighbors=$argv[1] -extended
+

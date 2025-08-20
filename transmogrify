@@ -1,0 +1,109 @@
+#!/bin/ksh
+
+
+for i
+do
+  letter="$(echo "$i" | tr -c -d A-Z)"
+  width=$(identify -format "%w" ruler150$letter.jpg)
+  dpi=$(lua -e "print(math.floor($width * 25.4 / 150))")
+  dpmm=$(lua -e "print($width / 150)")
+
+  echo "Estimated DPI $dpi DPMM $dpmm"
+
+  paddingmm=2
+
+  embiggenmm=0.9  # 0.6mm clearance plus 0.3mm filament overhang
+
+  paddingpixels=$(lua -e "print(math.ceil($paddingmm * $dpmm))")
+
+  speckle=1000 # speckles to drop
+
+  scalefactor=1
+  reduce=4
+
+  # correction="$(lua -e "print(300 * 92.6 / (25.4 * 386.0 / 300) / ($scalefactor.0) / $reduce.0)")"
+
+
+  # smooth="-a 1.3 -O 1.0"
+
+
+  case $i in
+    *region*.pbm)
+       base="$(suffex "$i")"
+       target="$base+${embiggenmm}mm.pbm"
+       pnmpad -white -right 75 -bottom 75 -top 75 -left 75 "$i" |
+       pnmtoplainpnm |
+       luapbm embiggen -mm "$embiggenmm" |
+       pnmcrop > "$target"
+       potrace -a 0 -t $speckle -b geojson "$target" |
+       tee "$base.json" > /dev/null # don't write if earlier failure?
+       ;;
+    *.png)
+       base="$(basename "$i" -orig.png)"
+       target="$base-${embiggenmm}mm.pbm"
+       if [[ "$base" = *-barricade ]]; then
+         pnmpad -white -right 75 -bottom 75 -top 75 -left 75 $base-despeckled.pbm |
+         pnmtoplainpnm |
+         luapbm embiggen -mm $embiggenmm > $target
+       else
+         convert $i -alpha extract -threshold 0 -negate $base-unpadded.pbm
+#         convert $i -alpha extract -threshold 1% -negate $base-unpadded.pbm
+         pnmflip $base-unpadded.pbm |
+         pnmpad -white -right 75 -bottom 75 -top 75 -left 75 |
+         pnmtoplainpnm |
+         luapbm embiggen -mm $embiggenmm > $target
+       fi
+       if cmp -s "$target" /dev/null; then rm -f "$target"; fi
+       rm -f $base-unpadded.pbm
+####       # potrace can produce dxf directly
+####       allpbms+=($base.pbm)
+####       potrace -t $speckle -r $dpi -b pdf $base.pbm -o $base.pdf &
+####       potrace -t $speckle -r $dpi -s $base.pbm -o - | 
+####         sed -e 's/fill="[^"]*"/fill="none"/' \
+####             -e 's/stroke="none"/stroke="black"/' > $base.svg
+####       python3 /usr/share/inkscape/extensions/dxf_outlines.py --units=$scale/$dpi --output=$base.dxf $base.svg
+       ;;
+     *.pbm)
+       base=$(basename "$i" .pbm)
+       if [[ "$reduce" = 1 ]]; then
+         input="$base.pbm"
+         reducesuffix=
+       else
+         input="$(mktemp)"
+         pbmreduce $reduce $base.pbm > $input
+         reducesuffix="-r$reduce"
+       fi
+
+      potrace -a 1 -t $speckle -r $correction -s "$input" -o - | 
+          sed -e 's/fill="[^"]*"/fill="none"/' \
+              -e 's/stroke="none"/stroke="black"/' > $base.svg
+       python3 /usr/share/inkscape/extensions/dxf_outlines.py --units=px --output=$base$scalesuffix$reducesuffix.dxf $base.svg
+         
+      if [[ "$input" != "$base.pbm" ]]; then
+        rm -f $input
+      fi
+
+
+# cannot get this one to scale properly??
+#       potrace -s $base.pbm -b dxf -r 10000 -t $speckle -o $base-direct.dxf
+# direct call to potrace produces perfect graphs but shapr3d sees a bunch of random control points
+     ;;
+
+   mask*.pdf)
+      # potrace at -r 300 confirmed for width 280.4mm on tray 4
+      #    therefore want -r 843.10
+      base=$(basename $i .pdf)
+      if [[ $i -nt $base.pbm ]]; then
+        pdftoppm -singlefile -r 1200 -mono -thinlinemode solid $i |
+        pbmreduce -threshold 4 > $base.pbm
+      fi
+      potrace -r 850.33 -s $base.pbm -o - |
+          sed -e 's/fill="[^"]*"/fill="none"/' \
+              -e 's/stroke="none"/stroke="black"/' > $base.svg
+       python3 /usr/share/inkscape/extensions/dxf_outlines.py --units=px --output=$base.dxf $base.svg
+      ;;
+
+  esac
+done
+
+wait

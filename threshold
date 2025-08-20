@@ -22,7 +22,6 @@ else
 fi | \
 ppmtopgm | \
 pamthreshold -simple -threshold=$threshold | \
-pamtopnm | \
-pnminvert
+pamtopnm
 
 exit $?

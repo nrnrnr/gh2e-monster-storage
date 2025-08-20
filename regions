@@ -1,0 +1,39 @@
+#!/bin/ksh
+
+case $# in
+  2) ;;
+  *) echo "Usage: $(basename $0) original.pbm regionfile" >&2; exit 1 ;;
+esac
+
+original="$1"
+regions="$2"
+
+
+base="$(suffex "$original")"
+jpg="${base%-*}"
+jpg="${jpg#*/}.jpg"
+
+while read i cx cy left top right bottom
+do
+  outfile="$(printf "%s-region%02d.pbm" "$base" "$i")"
+  outjpg="$(printf "%s-region%02d.jpg" "$base" "$i")"
+  outpng="$(printf "%s-region%02d.png" "$base" "$i")"
+
+  {
+    pamcut -left $left -right $right -top $top -bottom $bottom $original > "$outfile"
+    mask="$(mktemp)"
+    pnminvert "$outfile" > "$mask"
+    djpeg "$jpg" |   # bogus, need dimension before embiggening?
+    pnmcut -left $left -right $right -top $top -bottom $bottom |
+    pnmtopng -alpha="$mask" > "$outpng"
+    rm -f "$mask"
+  } &
+
+  djpeg "$jpg" |   # bogus, need dimension before embiggening
+  pnmcut -left $left -right $right -top $top -bottom $bottom |
+  cjpeg > "$outjpg" &
+
+done < "$regions"
+
+wait
+

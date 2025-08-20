@@ -1,0 +1,183 @@
+#!/usr/bin/env lua5.1
+-- poly2.lua — read polygon JSON (GeoJSON-ish) and emit TikZ or OpenSCAD
+-- deps: dkjson, your 'flags' library
+
+------------------ classic print functions ---------------------
+local stringf = string.format
+local function printf(...) return io.stdout:write(stringf(...)) end
+local function eprintf(...) return io.stderr:write(stringf(...)) end
+local function fprintf(fd, ...) return fd:write(stringf(...)) end
+local function dief(...) eprintf(...); os.exit(1) end
+local function errorf(...) return error(stringf(...)) end
+local function runf(...) return os.execute(stringf(...)) end
+----------------------------------------------------------------
+local json = require "dkjson"
+
+-- ----- flags: use your template -----
+local fields = require('flags').parser()
+  :enum('what', {'tikz', 'openscad', 'scad'}, 'tikz')
+  :help('tikz', 'write tikz')
+  :help('openscad', 'write openscad')
+  :numarg(1)
+  :parse(arg)
+
+-- ----- helpers -----
+local function read_json(path)
+  local f, err = io.open(path, "rb")
+  if not f then error(err) end
+  local txt = f:read("*a"); f:close()
+  local obj, pos, jerr = json.decode(txt, 1, nil)
+  if not obj then error("JSON decode error at "..tostring(pos)..": "..tostring(jerr)) end
+  return obj
+end
+
+local function isnum(x) return type(x) == "number" end
+
+local function pt_eq(a, b, eps)
+  eps = eps or 1e-9
+  return math.abs(a[1]-b[1]) < eps and math.abs(a[2]-b[2]) < eps
+end
+
+local function normalize_ring(ring)
+  -- copy valid 2D points; drop duplicate closing vertex
+  local out = {}
+  for i=1,#ring do
+    local p = ring[i]
+    if type(p) == "table" and isnum(p[1]) and isnum(p[2]) then
+      out[#out+1] = { p[1], p[2] }
+    end
+  end
+  if #out >= 2 and pt_eq(out[1], out[#out]) then table.remove(out, #out) end
+  return out
+end
+
+-- Extract polygons as: { { ring1, ring2(hole), ... }, ... }
+local function extract_polys(obj)
+  local polys = {}
+
+  local function push_polygon_from_coords(coords)
+    -- coords for Polygon: [ ring, ring, ... ]
+    local rings = {}
+    for _,ring in ipairs(coords or {}) do
+      rings[#rings+1] = normalize_ring(ring)
+    end
+    polys[#polys+1] = rings
+  end
+
+  if not obj then error("No JSON object") end
+  local t = obj.type
+
+  if t == "FeatureCollection" and obj.features then
+    for _,feat in ipairs(obj.features) do
+      if feat and feat.geometry then
+        local g = feat.geometry
+        if g.type == "Polygon" then
+          push_polygon_from_coords(g.coordinates)
+        elseif g.type == "MultiPolygon" then
+          for _,poly in ipairs(g.coordinates or {}) do
+            push_polygon_from_coords(poly)
+          end
+        end
+      end
+    end
+  elseif t == "Feature" and obj.geometry then
+    return extract_polys(obj.geometry)
+  elseif t == "Polygon" then
+    push_polygon_from_coords(obj.coordinates)
+  elseif t == "MultiPolygon" then
+    for _,poly in ipairs(obj.coordinates or {}) do
+      push_polygon_from_coords(poly)
+    end
+  else
+    error("Unsupported or missing GeoJSON type: "..tostring(t))
+  end
+
+  if #polys == 0 then error("No polygons found in JSON") end
+  return polys
+end
+
+local numbers = { 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine' }
+numbers[0] = 'zero'
+
+for i = 0, 9 do
+  numbers[tostring(i)] = numbers[i]
+end
+
+-- ----- emitters -----
+local function emit_tikz(polys, filename)
+  -- emits a single \path with subpaths; caller can add even-odd fill rule when using it
+  local pieces = {}
+  for _,rings in ipairs(polys) do
+    for _,ring in ipairs(rings) do
+      if #ring >= 2 then
+        local seg = {}
+        for i,pt in ipairs(ring) do
+          seg[#seg+1] = string.format("+(%g,%g)", pt[1], pt[2])
+          if i < #ring then seg[#seg+1] = " -- " end
+        end
+        seg[#seg+1] = " -- cycle"
+        pieces[#pieces+1] = table.concat(seg, '\n    ')
+      end
+    end
+  end
+  local macro = filename:gsub('.*/', ''):gsub('%.[^%.]*$', '')
+                        :gsub('%+%d.-mm', '')
+                        :gsub('%-?despeck', '')
+                        :gsub('%region', '')
+                        :gsub('%d', numbers)
+                        :gsub('%A', '')
+  return stringf([[\def\path%s{%s}]], macro, table.concat(pieces, " "))
+end
+
+local function emit_openscad(polys)
+  -- OpenSCAD polygon(points=..., paths=...) with 0-based indices
+  local points, paths, idx = {}, {}, 0
+  for _,rings in ipairs(polys) do
+    for _,ring in ipairs(rings) do
+      local path = {}
+      for _,pt in ipairs(ring) do
+        points[#points+1] = pt
+        path[#path+1] = idx  -- 0-based
+        idx = idx + 1
+      end
+      paths[#paths+1] = path
+    end
+  end
+
+  local function fmt_points()
+    local buf = {}
+    for _,p in ipairs(points) do
+      buf[#buf+1] = string.format("[%s,%s]", tostring(p[1]), tostring(p[2]))
+    end
+    return "["..table.concat(buf, ", ").."]"
+  end
+  local function fmt_paths()
+    local buf = {}
+    for _,path in ipairs(paths) do
+      local s = {}
+      for i,v in ipairs(path) do s[i] = tostring(v) end
+      buf[#buf+1] = "["..table.concat(s, ",").."]"
+    end
+    return "["..table.concat(buf, ", ").."]"
+  end
+
+  return string.format("polygon(points=%s, paths=%s);", fmt_points(), fmt_paths())
+end
+
+-- ----- HOF-style dispatch table -----
+local how = {}
+
+function how.tikz(filename)
+  local obj   = read_json(filename)
+  local polys = extract_polys(obj)
+  print(emit_tikz(polys, filename))
+end
+
+function how.openscad(filename)
+  local obj   = read_json(filename)
+  local polys = extract_polys(obj)
+  print(emit_openscad(polys))
+end
+
+-- ----- run -----
+assert(how[fields.what], "unknown format: "..tostring(fields.what))(arg[1])
