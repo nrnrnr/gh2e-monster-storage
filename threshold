@@ -1,0 +1,28 @@
+#!/bin/ksh
+
+# Apply simple threshold to image and output bitmap
+# Usage: threshold input.jpg threshold output.pbm
+
+if [[ $# -ne 2 ]]; then
+    print "Usage: threshold value input.jpg"
+    print "  threshold: value from 0.0 to 1.0 (e.g., 0.80)"
+    exit 1
+fi
+
+input="$2"
+threshold="$1"
+
+if [[ "$input" == *.png ]]; then
+    pngtopnm "$input"
+elif [[ "$input" == *.jpg ]] || [[ "$input" == *.jpeg ]]; then
+    djpeg "$input"
+else
+    print "Error: unsupported file format. Use .jpg or .png" 2>&1
+    exit 1
+fi | \
+ppmtopgm | \
+pamthreshold -simple -threshold=$threshold | \
+pamtopnm | \
+pnminvert
+
+exit $?
