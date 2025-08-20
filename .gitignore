@@ -1,0 +1,7 @@
+build
+*~
+*.o
+tests
+test-*
+*-test-*
+*-test
