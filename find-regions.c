@@ -183,7 +183,7 @@ int main(int argc, char* argv[]) {
         bboxes[i].bottom_y = bboxes[i].bottom;
         
         // Round only the y coordinate to group by rows
-        bboxes[i].rounded_y = intround(bboxes[i].bottom_y, 100);
+        bboxes[i].rounded_y = intround(bboxes[i].bottom_y, 250);
     }
     
     // Sort regions by rows then by columns
