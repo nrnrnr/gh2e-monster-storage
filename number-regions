@@ -1,16 +1,24 @@
 #!/bin/ksh
 
 # Add region numbers to original photo
-# Usage: number-regions regions.txt original.jpg output.jpg
+# Usage: number-regions regions.txt original.jpg [output.jpg]
+# If output.jpg not specified, writes to build/ directory
 
-if [[ $# -ne 3 ]]; then
-    print "Usage: number-regions regions.txt original.jpg output.jpg" >&2
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+    print "Usage: number-regions regions.txt original.jpg [output.jpg]" >&2
     exit 1
 fi
 
 regions_file="$1"
 original_image="$2"
-output_image="$3"
+
+if [[ $# -eq 3 ]]; then
+    output_image="$3"
+else
+    # Default output to build directory
+    basename_orig=$(basename "$original_image" .jpg)
+    output_image="build/${basename_orig}-numbered.jpg"
+fi
 
 if [[ ! -f "$regions_file" ]]; then
     print "Error: regions file $regions_file not found" >&2
@@ -43,6 +51,7 @@ done < "$regions_file"
 
 # Apply all annotations in one command
 eval "convert \"$original_image\" $annotations \"$output_image\""
+chmod +w "$output_image"
 
 if [[ $? -ne 0 ]]; then
     print "Error: failed to create numbered image" >&2
