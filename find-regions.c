@@ -11,9 +11,20 @@ typedef struct {
     int left, top, right, bottom;
     int pixel_count;
     int center_x, bottom_y;
-    int rounded_x, rounded_y;
+    int rounded_y;
     int region_number;
 } BoundingBox;
+
+// Comparison function for qsort: sort by rounded_y then by center_x
+static int compare_regions(const void *a, const void *b) {
+    const BoundingBox *bbox_a = (const BoundingBox *)a;
+    const BoundingBox *bbox_b = (const BoundingBox *)b;
+    
+    if (bbox_a->rounded_y != bbox_b->rounded_y) {
+        return bbox_a->rounded_y - bbox_b->rounded_y;
+    }
+    return bbox_a->center_x - bbox_b->center_x;
+}
 
 typedef struct {
     int x, y;
@@ -171,29 +182,12 @@ int main(int argc, char* argv[]) {
         bboxes[i].center_x = (bboxes[i].left + bboxes[i].right) / 2;
         bboxes[i].bottom_y = bboxes[i].bottom;
         
-        // Round to nearest multiple of 100
-        bboxes[i].rounded_x = intround(bboxes[i].center_x, 200);
-        bboxes[i].rounded_y = intround(bboxes[i].bottom_y, 200);
+        // Round only the y coordinate to group by rows
+        bboxes[i].rounded_y = intround(bboxes[i].bottom_y, 100);
     }
     
-    // Sort regions by rows (rounded_y) then by columns (rounded_x)
-    for (int i = 0; i < num_regions - 1; i++) {
-        for (int j = i + 1; j < num_regions; j++) {
-            int swap = 0;
-            if (bboxes[i].rounded_y > bboxes[j].rounded_y) {
-                swap = 1;
-            } else if (bboxes[i].rounded_y == bboxes[j].rounded_y && 
-                       bboxes[i].rounded_x > bboxes[j].rounded_x) {
-                swap = 1;
-            }
-            
-            if (swap) {
-                BoundingBox temp = bboxes[i];
-                bboxes[i] = bboxes[j];
-                bboxes[j] = temp;
-            }
-        }
-    }
+    // Sort regions by rows then by columns
+    qsort(bboxes, num_regions, sizeof(BoundingBox), compare_regions);
     
     // Assign sequential region numbers
     for (int i = 0; i < num_regions; i++) {
@@ -209,13 +203,12 @@ int main(int argc, char* argv[]) {
     
     for (int i = 0; i < num_regions; i++) {
         int center_y = (bboxes[i].top + bboxes[i].bottom) / 2;
-        fprintf(coords, "origin=\"%s\" name=%02d centerx=%d centery=%d left=%d top=%d right=%d bottom=%d roundedx=%d roundedy=%d\n",
+        fprintf(coords, "origin=\"%s\" name=%02d centerx=%d centery=%d left=%d top=%d right=%d bottom=%d roundedy=%d\n",
                argv[1],
                bboxes[i].region_number, bboxes[i].center_x, center_y,
                bboxes[i].left, bboxes[i].top, 
                bboxes[i].right, bboxes[i].bottom,
-                bboxes[i].rounded_x, bboxes[i].rounded_y
-                );
+               bboxes[i].rounded_y);
     }
     fclose(coords);
     
