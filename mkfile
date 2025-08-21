@@ -2,9 +2,14 @@ MKSHELL=/bin/ksh
 B=build
 
 REGIONSA=A01 A02 A03 A04 A05 A06 A07 A08 A09 A10 A11
+REGIONSB=B01 B02 B03 B04 B05 B06 B07
 PBMA=${REGIONSA:%=$B/region%.pbm}
+PBMB=${REGIONSB:%=$B/region%.pbm}
 TEXA=${REGIONSA:%=$B/region%.tex}
 SCADA=${REGIONSA:%=$B/region%.scad}
+
+TEXA=${REGIONSA:%=$B/region%.tex} ${REGIONSB:%=$B/region%.tex}
+
 
 all:V: 
 
@@ -40,6 +45,9 @@ $B/%-despeck.pbm:D: $B/%-thresh.pbm despeckle
 
 $PBMA:D: $B/monstersA-despeck.pbm $B/regions-monstersA.txt regions metricsA
 	./regions $B/monstersA-despeck.pbm $B/regions-monstersA.txt
+
+$PBMB:D: $B/monstersB-despeck.pbm $B/regions-monstersB.txt regions metricsB
+	./regions $B/monstersB-despeck.pbm $B/regions-monstersB.txt
 
 #$B/%.json: $B/%.pbm transmogrify
 #	./transmogrify $B/$stem.pbm
