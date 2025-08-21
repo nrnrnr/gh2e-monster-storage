@@ -68,3 +68,6 @@ $B/regions-%.txt: $B/%-despeck.pbm find-regions
 $B/%-coords.txt: $B/%-despeck.pbm find-regions
 	./find-regions $stem-despeck.pbm $target
 
+$B/%-numbered.jpg: $B/regions-%.txt %.jpg number-regions
+	./number-regions $B/regions-$stem.txt $stem.jpg $target
+
