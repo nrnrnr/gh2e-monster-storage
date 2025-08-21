@@ -28,3 +28,5 @@ Details
 -------
 The start of a pipeline is a photograph, which has a base name (for now, `monsters`), a suffix A, B, C, and so on, and finally `.jpg`.
 
+
+- all things built by scripts, like a numbered jpg, go in the build directory.

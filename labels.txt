@@ -1,0 +1,10 @@
+A01 Earth Demon
+A02 Frost Demon
+A03 Sun Demon
+A04 Flame Demon
+A05 Wind Demon
+A08 Bandit Scout
+A10 Bandit Archer
+A07 Inox Guard
+A11 Vermling Scout
+A09 Inox Archer
