@@ -1,102 +1,118 @@
 #!/bin/ksh
 
-# Draw polygons from CSV results on image
-# Usage: draw-polygons results.csv source.jpg output.jpg
+# Draw polygons from CSV results on images
+# Usage: draw-polygons results.csv
 
-if [[ $# -ne 3 ]]; then
-    print "Usage: draw-polygons results.csv source.jpg output.jpg" >&2
+if [[ $# -ne 1 ]]; then
+    print "Usage: draw-polygons results.csv" >&2
     exit 1
 fi
 
 csv_file="$1"
-source_image="$2"
-output_image="$3"
 
 if [[ ! -f "$csv_file" ]]; then
     print "Error: CSV file $csv_file not found" >&2
     exit 1
 fi
 
-if [[ ! -f "$source_image" ]]; then
-    print "Error: source image $source_image not found" >&2
-    exit 1
-fi
-
-# Start with the source image
-cp "$source_image" "$output_image"
-
-# Process each line of CSV (skip header) using awk to handle quoted fields properly
-tail -n +2 "$csv_file" | while read line; do
-    # Use awk to extract the template and poly fields from CSV
-    template=$(echo "$line" | awk -F',' '{print $2}')
-    poly=$(echo "$line" | awk -F'"' '{print $2}')
+# Function to process a single scene
+process_scene() {
+    scene="$1"
+    basename=$(basename "$scene" .jpg)
+    source_image="$scene"
+    output_image="build/$basename-polygons.jpg"
     
-    # Extract template name (A01, A02, etc.)
-    template_name=$(basename "$template" .png | sed 's/region//')
+    if [[ ! -f "$source_image" ]]; then
+        print "Warning: source image $source_image not found, skipping" >&2
+        return
+    fi
     
-    print "Processing $template_name with poly: $poly" >&2
+    print "Processing scene: $scene -> $output_image" >&2
     
-    # Parse polygon coordinates - extract coordinate pairs
-    coords=$(echo "$poly" | sed 's/\[\[//g' | sed 's/\]\]//g' | sed 's/\], \[/;/g' | sed 's/\[//g' | sed 's/\]//g')
+    # Start with the source image
+    cp "$source_image" "$output_image"
     
-    print "Coords: $coords" >&2
-    
-    # Build polygon points and calculate center
-    poly_points=""
-    total_x=0
-    total_y=0
-    count=0
-    
-    echo "$coords" | tr ';' '\n' | while IFS=',' read x y; do
-        # Clean up whitespace
-        x=$(echo "$x" | tr -d ' ')
-        y=$(echo "$y" | tr -d ' ')
+    # Process lines for this scene from CSV
+    tail -n +2 "$csv_file" | while read line; do
+        # Extract scene name from this line
+        line_scene=$(echo "$line" | awk -F',' '{print $1}')
         
-        if [[ -n "$x" && -n "$y" ]]; then
-            print "Point: $x,$y" >&2
-            echo "$x,$y" >> /tmp/poly_coords.$$
+        # Skip if this line is not for our current scene
+        if [[ "$line_scene" != "$scene" ]]; then
+            continue
+        fi
+        
+        # Use awk to extract the template and poly fields from CSV
+        template=$(echo "$line" | awk -F',' '{print $2}')
+        poly=$(echo "$line" | awk -F'"' '{print $2}')
+        
+        # Extract template name (A01, A02, etc.)
+        template_name=$(basename "$template" .png | sed 's/region//')
+        
+        # Parse polygon coordinates - extract coordinate pairs
+        coords=$(echo "$poly" | sed 's/\[\[//g' | sed 's/\]\]//g' | sed 's/\], \[/;/g' | sed 's/\[//g' | sed 's/\]//g')
+        
+        # Build polygon points and calculate center
+        poly_points=""
+        total_x=0
+        total_y=0
+        count=0
+        
+        echo "$coords" | tr ';' '\n' | while IFS=',' read x y; do
+            # Clean up whitespace
+            x=$(echo "$x" | tr -d ' ')
+            y=$(echo "$y" | tr -d ' ')
+            
+            if [[ -n "$x" && -n "$y" ]]; then
+                echo "$x,$y" >> /tmp/poly_coords.$$
+            fi
+        done
+        
+        # Read coordinates and build polygon command
+        if [[ -f /tmp/poly_coords.$$ ]]; then
+            while IFS=',' read px py; do
+                if [[ -n "$px" && -n "$py" ]]; then
+                    poly_points="$poly_points $px,$py"
+                    total_x=$((total_x + ${px%.*}))
+                    total_y=$((total_y + ${py%.*}))
+                    count=$((count + 1))
+                fi
+            done < /tmp/poly_coords.$$
+            
+            if [[ $count -gt 0 ]]; then
+                center_x=$((total_x / count))
+                center_y=$((total_y / count))
+                
+                # Adjust center position for text
+                adj_x=$((center_x - 50))
+                adj_y=$((center_y + 70))
+                
+                # Draw polygon outline and text
+                convert "$output_image" \
+                    -stroke black -strokewidth 3 -fill none \
+                    -draw "polygon $poly_points" \
+                    -font Arial-Bold -pointsize 240 -fill white -gravity northwest \
+                    -annotate +${adj_x}+${adj_y} "$template_name" \
+                    "$output_image"
+                
+                if [[ $? -ne 0 ]]; then
+                    print "Error: failed to draw polygon for $template_name in $scene" >&2
+                    exit 1
+                fi
+            fi
+            
+            rm -f /tmp/poly_coords.$$
         fi
     done
     
-    # Read coordinates and build polygon command
-    if [[ -f /tmp/poly_coords.$$ ]]; then
-        while IFS=',' read px py; do
-            if [[ -n "$px" && -n "$py" ]]; then
-                poly_points="$poly_points $px,$py"
-                total_x=$((total_x + ${px%.*}))
-                total_y=$((total_y + ${py%.*}))
-                count=$((count + 1))
-            fi
-        done < /tmp/poly_coords.$$
-        
-        if [[ $count -gt 0 ]]; then
-            center_x=$((total_x / count))
-            center_y=$((total_y / count))
-            
-            # Adjust center position for text
-            adj_x=$((center_x - 50))
-            adj_y=$((center_y + 70))
-            
-            print "Drawing polygon: $poly_points" >&2
-            print "Text at: $adj_x,$adj_y - $template_name" >&2
-            
-            # Draw polygon outline and text
-            convert "$output_image" \
-                -stroke black -strokewidth 3 -fill none \
-                -draw "polygon $poly_points" \
-                -font Arial-Bold -pointsize 240 -fill white -gravity northwest \
-                -annotate +${adj_x}+${adj_y} "$template_name" \
-                "$output_image"
-            
-            if [[ $? -ne 0 ]]; then
-                print "Error: failed to draw polygon for $template_name" >&2
-                exit 1
-            fi
-        fi
-        
-        rm -f /tmp/poly_coords.$$
-    fi
-done
+    chmod +w "$output_image"
+    print "Created polygon overlay image: $output_image" >&2
+}
 
-chmod +w "$output_image"
-print "Created polygon overlay image: $output_image" >&2
+# Get unique scenes from CSV (skip header)
+scenes=$(tail -n +2 "$csv_file" | awk -F',' '{print $1}' | sort | uniq)
+
+# Process each unique scene
+for scene in $scenes; do
+    process_scene "$scene"
+done
