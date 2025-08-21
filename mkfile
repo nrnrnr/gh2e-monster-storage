@@ -28,7 +28,7 @@ ppm%.int:D: ruler150%.jpg # pixels per meter
 #	unblue 200 5 $stem.jpg $target
 
 $B/%-thresh.pbm:D: $B/%-blur5.jpg threshold
-	./threshold 0.79 $stem-blur5.jpg > $target
+	./threshold 0.79 $B/$stem-blur5.jpg > $target
 
 $B/%-despeck.pbm:D: $B/%-thresh.pbm despeckle
 	set -o pipefail
