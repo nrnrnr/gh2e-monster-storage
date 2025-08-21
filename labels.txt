@@ -1,10 +1,50 @@
-A01 Earth Demon
-A02 Frost Demon
-A03 Sun Demon
-A04 Flame Demon
+A01 Frost Demon
+A02 Flame Demon
+A03 Earth Demon
+A04 Sun Demon
 A05 Wind Demon
-A08 Bandit Scout
-A10 Bandit Archer
 A07 Inox Guard
+A08 Inox Archer
+A09 
+A10 Bandit Archer
 A11 Vermling Scout
-A09 Inox Archer
+
+Bandit Scout
+
+
+Ancient Artillery
+Bandit Archer
+Bandit Scout
+Black Imp
+Cave Bear
+Chaos Demon
+City Archer
+City Guard
+Crystal Rot
+Cultist
+Deep Terror
+Earth Demon
+Flame Demon
+Forest Imp
+Frost Demon
+Giant Viper
+Harrower Infester
+Hound
+Inox Archer
+Inox Guard
+Inox Priest
+Living Bones
+Living Corpse
+Living Spirit
+Lurker Soldier
+Night Demon
+Ooze
+Rending Drake
+Savvas Icestorm
+Savvas Lavaflow
+Spitting Drake
+Stone Construct
+Sun Demon
+Vermling Priest
+Vermling Scout
+Wind Demon
