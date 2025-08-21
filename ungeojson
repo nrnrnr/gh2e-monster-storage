@@ -111,13 +111,16 @@ end
 -- ----- emitters -----
 local function emit_tikz(polys, filename, dpi)
   -- emits a single \path with subpaths; caller can add even-odd fill rule when using it
+  local inches_per_dot = 1.0 / dpi
+  local mm_per_inch = 25.4
+  local function mm(dots) return mm_per_inch * inches_per_dot * dots end
   local pieces = {}
   for _,rings in ipairs(polys) do
     for _,ring in ipairs(rings) do
       if #ring >= 2 then
         local seg = {}
         for i,pt in ipairs(ring) do
-          seg[#seg+1] = string.format("+(%g,%g)", pt[1], pt[2])
+          seg[#seg+1] = string.format("+(%g,%g)", mm(pt[1]), mm(pt[2]))
           if i < #ring then seg[#seg+1] = " -- " end
         end
         seg[#seg+1] = " -- cycle"

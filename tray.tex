@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[landscape]{article}
 \usepackage{tikz}
 \newcommand\defpath[2]{%
   \expandafter\def\csname path-#1\endcsname{#2}}
@@ -21,9 +21,9 @@
 \begin{document}
 
 \begin{center}
-\begin{tikzpicture}
+\begin{tikzpicture}[x=1mm,y=1mm]
   \node [anchor=south west] (0,0) {\includegraphics{build/regionA01.png}};
-  \draw[ultra thick,x=0.058mm,y=0.058mm] (0,0) \usepath{A01};
+  \draw[ultra thick] (0,0) \usepath{A01};
 
 %  \draw[ultra thick,x=0.058mm,y=0.058mm] (0, 0)
 %     node [anchor=south west] {\image{A01}} \usepath{A01};
