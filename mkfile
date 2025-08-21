@@ -32,8 +32,11 @@ ppm%.int:D: ruler150%.jpg # pixels per meter
 #$B/%-unblue.png: %.jpg unblue
 #	unblue 200 5 $stem.jpg $target
 
-$B/%-thresh.pbm:D: $B/%-blur5.jpg threshold
-	./threshold 0.79 $B/$stem-blur5.jpg > $target
+$B/%A-thresh.pbm:D: $B/%A-blur5.jpg threshold
+	./threshold 0.79 $B/${stem}A-blur5.jpg > $target
+
+$B/%B-thresh.pbm:D: $B/%B-blur5.jpg threshold
+	./threshold 0.76 $B/${stem}B-blur5.jpg > $target
 
 $B/%-despeck.pbm:D: $B/%-thresh.pbm despeckle
 	set -o pipefail
@@ -42,6 +45,9 @@ $B/%-despeck.pbm:D: $B/%-thresh.pbm despeckle
 
 #regions-%:V: $B/monsters%-despeck.pbm $B/regions-monsters%.txt
 #	./regions $prereq
+
+pbma:V: $PBMA
+pbmb:V: $PBMB
 
 $PBMA:D: $B/monstersA-despeck.pbm $B/regions-monstersA.txt regions metricsA
 	./regions $B/monstersA-despeck.pbm $B/regions-monstersA.txt
@@ -75,6 +81,8 @@ $B/regions-%.txt: $B/%-despeck.pbm find-regions
 
 $B/%-coords.txt: $B/%-despeck.pbm find-regions
 	./find-regions $stem-despeck.pbm $target
+
+number-%:V: $B/monsters%-numbered.jpg
 
 $B/%-numbered.jpg: $B/regions-%.txt %.jpg number-regions
 	./number-regions $B/regions-$stem.txt $stem.jpg $target
