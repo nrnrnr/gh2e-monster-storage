@@ -1,0 +1,52 @@
+#!/bin/ksh
+
+# Add region numbers to original photo
+# Usage: number-regions regions.txt original.jpg output.jpg
+
+if [[ $# -ne 3 ]]; then
+    print "Usage: number-regions regions.txt original.jpg output.jpg" >&2
+    exit 1
+fi
+
+regions_file="$1"
+original_image="$2"
+output_image="$3"
+
+if [[ ! -f "$regions_file" ]]; then
+    print "Error: regions file $regions_file not found" >&2
+    exit 1
+fi
+
+if [[ ! -f "$original_image" ]]; then
+    print "Error: original image $original_image not found" >&2
+    exit 1
+fi
+
+# Build ImageMagick command with all annotations
+annotations=""
+
+# Read each region and collect annotations
+while read line; do
+    # Parse the regions file format using awk
+    region_num=$(echo "$line" | awk -F'name=' '{print $2}' | awk '{print $1}')
+    center_x=$(echo "$line" | awk -F'centerx=' '{print $2}' | awk '{print $1}')
+    center_y=$(echo "$line" | awk -F'centery=' '{print $2}' | awk '{print $1}')
+    
+    if [[ -n "$region_num" && -n "$center_x" && -n "$center_y" ]]; then
+        # Adjust center position to account for text size (rough centering)
+        adj_x=$((center_x - 50))
+        adj_y=$((center_y + 70))
+        
+        annotations="$annotations -font Arial-Bold -pointsize 240 -fill white -gravity northwest -annotate +${adj_x}+${adj_y} \"$region_num\""
+    fi
+done < "$regions_file"
+
+# Apply all annotations in one command
+eval "convert \"$original_image\" $annotations \"$output_image\""
+
+if [[ $? -ne 0 ]]; then
+    print "Error: failed to create numbered image" >&2
+    exit 1
+fi
+
+print "Created numbered image: $output_image" >&2
