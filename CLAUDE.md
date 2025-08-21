@@ -30,3 +30,4 @@ The start of a pipeline is a photograph, which has a base name (for now, `monste
 
 
 - all things built by scripts, like a numbered jpg, go in the build directory.
+- Never modify monstersA.jpg, or any similar file with a different letter.

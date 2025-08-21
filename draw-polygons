@@ -1,0 +1,102 @@
+#!/bin/ksh
+
+# Draw polygons from CSV results on image
+# Usage: draw-polygons results.csv source.jpg output.jpg
+
+if [[ $# -ne 3 ]]; then
+    print "Usage: draw-polygons results.csv source.jpg output.jpg" >&2
+    exit 1
+fi
+
+csv_file="$1"
+source_image="$2"
+output_image="$3"
+
+if [[ ! -f "$csv_file" ]]; then
+    print "Error: CSV file $csv_file not found" >&2
+    exit 1
+fi
+
+if [[ ! -f "$source_image" ]]; then
+    print "Error: source image $source_image not found" >&2
+    exit 1
+fi
+
+# Start with the source image
+cp "$source_image" "$output_image"
+
+# Process each line of CSV (skip header) using awk to handle quoted fields properly
+tail -n +2 "$csv_file" | while read line; do
+    # Use awk to extract the template and poly fields from CSV
+    template=$(echo "$line" | awk -F',' '{print $2}')
+    poly=$(echo "$line" | awk -F'"' '{print $2}')
+    
+    # Extract template name (A01, A02, etc.)
+    template_name=$(basename "$template" .png | sed 's/region//')
+    
+    print "Processing $template_name with poly: $poly" >&2
+    
+    # Parse polygon coordinates - extract coordinate pairs
+    coords=$(echo "$poly" | sed 's/\[\[//g' | sed 's/\]\]//g' | sed 's/\], \[/;/g' | sed 's/\[//g' | sed 's/\]//g')
+    
+    print "Coords: $coords" >&2
+    
+    # Build polygon points and calculate center
+    poly_points=""
+    total_x=0
+    total_y=0
+    count=0
+    
+    echo "$coords" | tr ';' '\n' | while IFS=',' read x y; do
+        # Clean up whitespace
+        x=$(echo "$x" | tr -d ' ')
+        y=$(echo "$y" | tr -d ' ')
+        
+        if [[ -n "$x" && -n "$y" ]]; then
+            print "Point: $x,$y" >&2
+            echo "$x,$y" >> /tmp/poly_coords.$$
+        fi
+    done
+    
+    # Read coordinates and build polygon command
+    if [[ -f /tmp/poly_coords.$$ ]]; then
+        while IFS=',' read px py; do
+            if [[ -n "$px" && -n "$py" ]]; then
+                poly_points="$poly_points $px,$py"
+                total_x=$((total_x + ${px%.*}))
+                total_y=$((total_y + ${py%.*}))
+                count=$((count + 1))
+            fi
+        done < /tmp/poly_coords.$$
+        
+        if [[ $count -gt 0 ]]; then
+            center_x=$((total_x / count))
+            center_y=$((total_y / count))
+            
+            # Adjust center position for text
+            adj_x=$((center_x - 50))
+            adj_y=$((center_y + 70))
+            
+            print "Drawing polygon: $poly_points" >&2
+            print "Text at: $adj_x,$adj_y - $template_name" >&2
+            
+            # Draw polygon outline and text
+            convert "$output_image" \
+                -stroke black -strokewidth 3 -fill none \
+                -draw "polygon $poly_points" \
+                -font Arial-Bold -pointsize 240 -fill white -gravity northwest \
+                -annotate +${adj_x}+${adj_y} "$template_name" \
+                "$output_image"
+            
+            if [[ $? -ne 0 ]]; then
+                print "Error: failed to draw polygon for $template_name" >&2
+                exit 1
+            fi
+        fi
+        
+        rm -f /tmp/poly_coords.$$
+    fi
+done
+
+chmod +w "$output_image"
+print "Created polygon overlay image: $output_image" >&2
