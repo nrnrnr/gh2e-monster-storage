@@ -3,6 +3,10 @@
 #include <string.h>
 #include <pam.h>
 
+static int intround(int n, int multiple) {
+  return multiple * ((n + multiple / 2) / multiple);
+}
+
 typedef struct {
     int left, top, right, bottom;
     int pixel_count;
@@ -168,8 +172,8 @@ int main(int argc, char* argv[]) {
         bboxes[i].bottom_y = bboxes[i].bottom;
         
         // Round to nearest multiple of 100
-        bboxes[i].rounded_x = ((bboxes[i].center_x + 50) / 100) * 100;
-        bboxes[i].rounded_y = ((bboxes[i].bottom_y + 50) / 100) * 100;
+        bboxes[i].rounded_x = intround(bboxes[i].center_x, 200);
+        bboxes[i].rounded_y = intround(bboxes[i].bottom_y, 200);
     }
     
     // Sort regions by rows (rounded_y) then by columns (rounded_x)
@@ -205,11 +209,13 @@ int main(int argc, char* argv[]) {
     
     for (int i = 0; i < num_regions; i++) {
         int center_y = (bboxes[i].top + bboxes[i].bottom) / 2;
-        fprintf(coords, "origin=\"%s\" name=%02d centerx=%d centery=%d left=%d top=%d right=%d bottom=%d\n",
+        fprintf(coords, "origin=\"%s\" name=%02d centerx=%d centery=%d left=%d top=%d right=%d bottom=%d roundedx=%d roundedy=%d\n",
                argv[1],
                bboxes[i].region_number, bboxes[i].center_x, center_y,
                bboxes[i].left, bboxes[i].top, 
-               bboxes[i].right, bboxes[i].bottom);
+               bboxes[i].right, bboxes[i].bottom,
+                bboxes[i].rounded_x, bboxes[i].rounded_y
+                );
     }
     fclose(coords);
     
