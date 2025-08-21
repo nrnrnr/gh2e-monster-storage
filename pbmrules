@@ -1,0 +1,15 @@
+#!/bin/ksh
+
+for i
+do
+  typeset -l lower="$i"
+  B='$B'
+
+echo "PBM$i"='${REGIONS'"$i:%=$B/region%.pbm}"
+
+echo '$PBM'"$i:D: $B/monsters$i-despeck.pbm $B/regions-monsters$i.txt regions metrics$i
+	./regions $B/monsters$i-despeck.pbm $B/regions-monsters$i.txt"
+
+echo "pbm$lower:V:" '$PBM'$i
+
+done
