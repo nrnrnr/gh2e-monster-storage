@@ -6,6 +6,9 @@
 typedef struct {
     int left, top, right, bottom;
     int pixel_count;
+    int center_x, bottom_y;
+    int rounded_x, rounded_y;
+    int region_number;
 } BoundingBox;
 
 typedef struct {
@@ -159,6 +162,40 @@ int main(int argc, char* argv[]) {
         }
     }
     
+    // Calculate positioning info for each region
+    for (int i = 0; i < num_regions; i++) {
+        bboxes[i].center_x = (bboxes[i].left + bboxes[i].right) / 2;
+        bboxes[i].bottom_y = bboxes[i].bottom;
+        
+        // Round to nearest multiple of 100
+        bboxes[i].rounded_x = ((bboxes[i].center_x + 50) / 100) * 100;
+        bboxes[i].rounded_y = ((bboxes[i].bottom_y + 50) / 100) * 100;
+    }
+    
+    // Sort regions by rows (rounded_y) then by columns (rounded_x)
+    for (int i = 0; i < num_regions - 1; i++) {
+        for (int j = i + 1; j < num_regions; j++) {
+            int swap = 0;
+            if (bboxes[i].rounded_y > bboxes[j].rounded_y) {
+                swap = 1;
+            } else if (bboxes[i].rounded_y == bboxes[j].rounded_y && 
+                       bboxes[i].rounded_x > bboxes[j].rounded_x) {
+                swap = 1;
+            }
+            
+            if (swap) {
+                BoundingBox temp = bboxes[i];
+                bboxes[i] = bboxes[j];
+                bboxes[j] = temp;
+            }
+        }
+    }
+    
+    // Assign sequential region numbers
+    for (int i = 0; i < num_regions; i++) {
+        bboxes[i].region_number = i + 1;
+    }
+    
     // Write coordinates to file
     FILE* coords = fopen(argv[2], "w");
     if (!coords) {
@@ -167,11 +204,10 @@ int main(int argc, char* argv[]) {
     }
     
     for (int i = 0; i < num_regions; i++) {
-        int center_x = (bboxes[i].left + bboxes[i].right) / 2;
         int center_y = (bboxes[i].top + bboxes[i].bottom) / 2;
         fprintf(coords, "origin=\"%s\" name=%02d centerx=%d centery=%d left=%d top=%d right=%d bottom=%d\n",
                argv[1],
-               i + 1, center_x, center_y,
+               bboxes[i].region_number, bboxes[i].center_x, center_y,
                bboxes[i].left, bboxes[i].top, 
                bboxes[i].right, bboxes[i].bottom);
     }
