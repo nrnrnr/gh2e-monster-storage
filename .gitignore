@@ -1,7 +1,16 @@
 build
 *~
 *.o
+testout
 tests
 test-*
 *-test-*
 *-test
+dpi*.float
+dpi*.int
+ppm*.int
+/find-regions
+*.aux
+*.out
+*.pdf
+*.log

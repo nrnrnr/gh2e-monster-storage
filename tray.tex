@@ -1,0 +1,32 @@
+\documentclass{article}
+\usepackage{tikz}
+\newcommand\defpath[2]{%
+  \expandafter\def\csname path-#1\endcsname{#2}}
+\newcommand\usepath[1]{%
+  \csname path-#1\endcsname}
+\newcommand\setdpi[2]{%
+  \expandafter\def\csname dpi-#1\endcsname{#2}}
+\newcommand\usedpi[1]{%
+  \csname dpi-#1\endcsname}
+\newcommand\setunit[2]{%
+  \expandafter\def\csname unit-#1\endcsname{#2}}
+\newcommand\useunit[1]{%
+  \csname unit-#1\endcsname}
+
+\newcommand\image[1]{%
+  \includegraphics{build/region#1.png}}
+
+\input{build/regionA01.tex}
+
+\begin{document}
+
+\begin{center}
+\begin{tikzpicture}
+  \node [anchor=south west] (0,0) {\includegraphics{build/regionA01.png}};
+  \draw[ultra thick,x=0.058mm,y=0.058mm] (0,0) \usepath{A01};
+
+%  \draw[ultra thick,x=0.058mm,y=0.058mm] (0, 0)
+%     node [anchor=south west] {\image{A01}} \usepath{A01};
+\end{tikzpicture}
+\end{center}
+\end{document}

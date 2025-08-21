@@ -1,23 +1,28 @@
-We're doing image processing.  We'll take a photograph of board-game pieces and do the following:
+We're processing images of board-game pieces.  An image, for example `monstersA.jpg`, is processed as follows:
 
- 1. Create a bitmap from the image with background pixels black and foreground pixels white.  The background should ideally be plain white paper without grid lines for best results.
+ 1. Create file `ruler150A.jpg` by cropping the original image to the width of the 150mm ruler in the image.  The ruler will be used to compute the number of pixels per millimeter in the image.  This number is different for each image.  A person will perform this step.
 
- 2. Despeckle the bitmap by flipping small regions.  E.g., a contiguous group of white pixels that does not contain enough pixels becomes black, and vice versa.
+ 2. Run the original image `monstersA.jpg` through a blur-threshold-despeckle pipeline to create a bitmap `monstersA-despect.pbm`.  This is handled by mkfile rules.  In the resulting bitmap each board-game piece is solid black.
 
- 3. We will then take each black region and calculate its bounding box.  Number each region and superimpose the numbers on the original photo.  A person will then label each numbered image.
-
- 4. Each black region will then be extracted as an image, and its coordinates will be applied to the original image as well to get the foreground part with transparent background.  These images will be written to files using the labels from step 3.
-
- 5. Each black image will be converted to geometry using `potrace` with the geojson back end.  Then that info will be converted both to a tikz path and to 2D geometry for openscad.
+ 3. Find regions using the `find-region` program, which writes `regionsA.txt`, to hold the bounding box of each black region.
  
-The processing will be orchestrated by a mkfile, which uses Andrew Hume's mk, a tool very similar to GNU Make, but with variable syntax as in the shell.
+    (Optionally, the `regionsA.txt` file can be used to number each region.  `number-regions monstersA.txt` should create `monstersA-regions.jpg`, in which a region number is superimposed over the center of each region in the original photo.)
 
-As we develop the tools and the mkfile, you will update these instructions with any refinements we develop interactively.
+ 4. Extract the regions using the `regions` script.  There is an example in the mkfile.
 
+ 5. Each black region will then be transmogrified using `transmogrify`.  This script embiggens the region by an amount in millimeters specified on the command line using the `-embiggen` option, or if the option is not given, defaults to `0.9`.
+    The embiggened region is then cropped.  The embiggened region is then traced by `potrace`.  That trace is then used to extract tikz and openscad info.
+ 
 **Important**: Any time we take a new image-processing step, let me look at samples before proceeding to the next step.
 
 **Script conventions**: Scripts output data to stdout, error/status messages to stderr. This allows pipeline composition.
 
+
+Test scripts
+------------
+All test scripts created by Claude go in the `tests` directory.
+All test outputs go in the `testout` directory.
+When we seem to be done with a test script, Claude should move it to `obsolete-tests`.
 
 Details
 -------

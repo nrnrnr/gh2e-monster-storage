@@ -103,8 +103,13 @@ for i = 0, 9 do
   numbers[tostring(i)] = numbers[i]
 end
 
+local function println(...)
+  printf(...)
+  io.stdout:write '\n'
+end
+
 -- ----- emitters -----
-local function emit_tikz(polys, filename)
+local function emit_tikz(polys, filename, dpi)
   -- emits a single \path with subpaths; caller can add even-odd fill rule when using it
   local pieces = {}
   for _,rings in ipairs(polys) do
@@ -120,13 +125,10 @@ local function emit_tikz(polys, filename)
       end
     end
   end
-  local macro = filename:gsub('.*/', ''):gsub('%.[^%.]*$', '')
-                        :gsub('%+%d.-mm', '')
-                        :gsub('%-?despeck', '')
-                        :gsub('%region', '')
-                        :gsub('%d', numbers)
-                        :gsub('%A', '')
-  return stringf([[\def\path%s{%s}]], macro, table.concat(pieces, " "))
+  local macro = filename:gsub('^.*/', ''):gsub('region', ''):gsub('%.json$', '')
+  println([[\setdpi{%s}{%g}]], macro, dpi)
+  println([[\setunit{%s}{%g}]], macro, 1.0 / dpi)
+  println([[\defpath{%s}{%s}]], macro, table.concat(pieces, " "))
 end
 
 local function emit_openscad(polys)
@@ -167,16 +169,20 @@ end
 -- ----- HOF-style dispatch table -----
 local how = {}
 
+require 'ioutil'
+
 function how.tikz(filename)
   local obj   = read_json(filename)
   local polys = extract_polys(obj)
-  print(emit_tikz(polys, filename))
+  local letter = filename:gsub('%U', '')
+  local dpi = assert(tonumber(assert(io.contents(stringf('dpi%s.float', letter)))))
+  emit_tikz(polys, filename, dpi)
 end
 
 function how.openscad(filename)
   local obj   = read_json(filename)
   local polys = extract_polys(obj)
-  print(emit_openscad(polys))
+  emit_openscad(polys, filename, dpi)
 end
 
 -- ----- run -----

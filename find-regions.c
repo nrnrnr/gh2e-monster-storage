@@ -169,7 +169,8 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < num_regions; i++) {
         int center_x = (bboxes[i].left + bboxes[i].right) / 2;
         int center_y = (bboxes[i].top + bboxes[i].bottom) / 2;
-        fprintf(coords, "%d %d %d %d %d %d %d\n", 
+        fprintf(coords, "origin=\"%s\" name=%02d centerx=%d centery=%d left=%d top=%d right=%d bottom=%d\n",
+               argv[1],
                i + 1, center_x, center_y,
                bboxes[i].left, bboxes[i].top, 
                bboxes[i].right, bboxes[i].bottom);

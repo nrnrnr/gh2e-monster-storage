@@ -8,30 +8,38 @@ esac
 original="$1"
 regions="$2"
 
+letter="$(basename "$original" | tr -cd A-Z)"
+dir="$(dirname $original)"
 
 base="$(suffex "$original")"
 jpg="${base%-*}"
 jpg="${jpg#*/}.jpg"
 
-while read i cx cy left top right bottom
+[[ -r ppm$letter.int ]] || { echo "$0: no ppm$letter.int" >&2 ; exit 1 ; }
+
+ppm=$(cat ppm$letter.int)
+
+while read commands
 do
-  outfile="$(printf "%s-region%02d.pbm" "$base" "$i")"
-  outjpg="$(printf "%s-region%02d.jpg" "$base" "$i")"
-  outpng="$(printf "%s-region%02d.png" "$base" "$i")"
+  eval $commands
+  case $name in
+    [0-9][0-9]) outbase="$dir/region$letter$name" ;;
+    *)          outbase="$dir/$name" ;;
+  esac
 
   {
-    pamcut -left $left -right $right -top $top -bottom $bottom $original > "$outfile"
+    pamcut -left $left -right $right -top $top -bottom $bottom $original > "$outbase.pbm"
     mask="$(mktemp)"
-    pnminvert "$outfile" > "$mask"
+    pnminvert "$outbase.pbm" > "$mask"
     djpeg "$jpg" |   # bogus, need dimension before embiggening?
     pnmcut -left $left -right $right -top $top -bottom $bottom |
-    pnmtopng -alpha="$mask" > "$outpng"
+    pnmtopng -size="$ppm $ppm 1" -alpha="$mask" > "$outbase.png"
     rm -f "$mask"
   } &
 
-  djpeg "$jpg" |   # bogus, need dimension before embiggening
-  pnmcut -left $left -right $right -top $top -bottom $bottom |
-  cjpeg > "$outjpg" &
+#  djpeg "$jpg" |   # bogus, need dimension before embiggening
+#  pnmcut -left $left -right $right -top $top -bottom $bottom |
+#  cjpeg > "$outbase.jpg" &
 
 done < "$regions"
 

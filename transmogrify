@@ -4,17 +4,14 @@
 for i
 do
   letter="$(echo "$i" | tr -c -d A-Z)"
-  width=$(identify -format "%w" ruler150$letter.jpg)
-  dpi=$(lua -e "print(math.floor($width * 25.4 / 150))")
-  dpmm=$(lua -e "print($width / 150)")
-
-  echo "Estimated DPI $dpi DPMM $dpmm"
+  dpi=$(cat dpi$letter.int)
+  ppm=$(cat ppm$letter.float)
 
   paddingmm=2
 
   embiggenmm=0.9  # 0.6mm clearance plus 0.3mm filament overhang
 
-  paddingpixels=$(lua -e "print(math.ceil($paddingmm * $dpmm))")
+  paddingpixels=$(lua -e "print(math.ceil($paddingmm * $ppm / 1000.0))")
 
   speckle=1000 # speckles to drop
 
@@ -29,14 +26,15 @@ do
 
   case $i in
     *region*.pbm)
+set -x
        base="$(suffex "$i")"
-       target="$base+${embiggenmm}mm.pbm"
+       target="$base-${embiggenmm}mm.pbm"
+#       json="$base.json"
        pnmpad -white -right 75 -bottom 75 -top 75 -left 75 "$i" |
        pnmtoplainpnm |
        luapbm embiggen -mm "$embiggenmm" |
        pnmcrop > "$target"
-       potrace -a 0 -t $speckle -b geojson "$target" |
-       tee "$base.json" > /dev/null # don't write if earlier failure?
+       potrace -o "$base.json" -a 0 -t $speckle -b geojson "$target"
        ;;
     *.png)
        base="$(basename "$i" -orig.png)"
