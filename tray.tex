@@ -5,7 +5,7 @@
 \newcommand\defpath[2]{%
   \expandafter\def\csname path-#1\endcsname{#2}}
 \newcommand\usepath[1]{%
-  \expandafter\ifx\csname path-#1\endcsname\undefined
+  \expandafter\ifx\csname path-#1\endcsname\relax
      \GenericError{}{Path #1 is not defined}{Check spelling}{}
   \else
     \csname path-#1\endcsname
@@ -45,7 +45,7 @@
 
 \newcommand\monsterbase[3][]{%
   \node [image] at (#2) {\includegraphics[#1]{named/#3.png}};
-  \draw [outline] (#2) \usepath{#3};
+  \draw [outline] (#2) \usepath{#3#1};
 }
 
 \newcommand\monster[2][]{\monsterbase[#1]{#2}{#2}}
@@ -64,7 +64,7 @@
   \path (124,5) coordinate (City Guard);
   \path (155,6) coordinate (Ancient Artillery);
   \path (186,6) coordinate (Hound 1);
-  \path (186,6) coordinate (Hound 2);
+  \path (215,6) coordinate (Hound 2);
 
   \path (4, 50) coordinate (Inox Guard);
   \path (44, 50) coordinate (Inox Priest);
@@ -74,35 +74,42 @@
   \monster{Frost Demon}
   \mone{Vermling Scout}
   \mtwo{Vermling Scout}
-  \mone[angle=180]{Forest Imp}
-  \draw[outline,red] (Forest Imp 1) \usepath{Forest Imp angle=180};
+  \mone[ angle=180]{Forest Imp}
 
-  \draw[outline,blue] (0,0) \usepath{Forest Imp frog};
-  \draw[outline,green] (0,0) \usepath{Forest Imp};
+
 
 %  \begin{scope}[rotate around={180:(500,500)}] \mone{Forest Imp}
 %  \end{scope}
   \mtwo{Forest Imp}
   \monster{City Guard}
 
+   \monster{Ancient Artillery};
+   \mone{Hound};
+   \mtwo{Hound};
+%   \monster{Inox Guard};
+%   \monster{Inox Priest};
+%   \monster{City Archer};
+%   \monster{Vermling Priest};
+
+
 %  \draw[ultra thick,x=0.058mm,y=0.058mm] (0, 0)
 %     node [anchor=south west] {\image{A01}} \usepath{A01};
 \end{tikzpicture}
 
 
-\begin{tikzpicture}
-
-\draw (0,0) rectangle (250,150); % full tray
-
-  \path (20,20) coordinate (Frost Demon);
-  \path (4,6) coordinate (Vermling Scout 1);
-  \path (32,6) coordinate (Vermling Scout 2);
-
-  \monster{Frost Demon}
-  \mone{Vermling Scout}
-  \mtwo{Vermling Scout}
-
-\end{tikzpicture}
+%%\begin{tikzpicture}
+%%
+%%\draw (0,0) rectangle (250,150); % full tray
+%%
+%%  \path (20,20) coordinate (Frost Demon);
+%%  \path (4,6) coordinate (Vermling Scout 1);
+%%  \path (32,6) coordinate (Vermling Scout 2);
+%%
+%%  \monster{Frost Demon}
+%%  \mone{Vermling Scout}
+%%  \mtwo{Vermling Scout}
+%%
+%%\end{tikzpicture}
 
 \end{center}
 \end{document}
