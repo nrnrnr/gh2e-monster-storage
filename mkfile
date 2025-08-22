@@ -8,10 +8,17 @@ REGIONSB=B01 B02 B03 B04 B05 B06 B07
 REGIONSC=C01 C02 C03 C04 C05 C06 C07 C08 C09 C10 C11
 REGIONSD=D01 D02 D03 D04 D05 D06 D07 D08 D09 D10 D11
 
-<|./pbmrules A B C D
+REGIONSW=W01 W02 W03 W04 W05 W06 W07 W08 W09 W10 W11
+REGIONSX=X01 X02 X03 X04 X05 X06 X07 X08 X09 X10 X11
+REGIONSY=Y01 Y02 Y03 Y04 Y05 Y06 Y07 Y08 Y09 Y10 Y11
+REGIONSZ=Z01 Z02 Z03 Z04 Z05 Z06 Z07
 
-TEX=${REGIONSA:%=$B/region%.tex} ${REGIONSB:%=$B/region%.tex} \
-    ${REGIONSC:%=$B/region%.tex} ${REGIONSD:%=$B/region%.tex}
+<|./pbmrules W X Y Z
+
+TEX=${REGIONSW:%=$B/region%.tex} \
+    ${REGIONSX:%=$B/region%.tex} \
+    ${REGIONSY:%=$B/region%.tex} \
+    ${REGIONSZ:%=$B/region%.tex} \
 
 
 THRESHA=0.79
@@ -19,7 +26,20 @@ THRESHB=0.76
 THRESHC=0.725
 THRESHD=0.755
 
-tex:V: $TEX
+THRESHW=0.89
+THRESHX=0.90
+THRESHY=0.88
+THRESHZ=0.90
+
+tex:V: outlines.tex
+
+label-sed:D: labels-to-sed labels.txt
+	./labels-to-sed labels.txt
+
+outlines.tex:D: $TEX label-sed link-named-regions
+	./link-named-regions labels.txt
+	set -o pipefail
+        cat named/*.tex | ./label-sed > $target
 
 metrics%:V: dpi%.float dpi%.int ppm%.int
 
@@ -50,7 +70,7 @@ $B/monsters%-thresh.pbm:D: $B/monsters%-blur5.jpg threshold
 
 $B/%-despeck.pbm:D: $B/%-thresh.pbm despeckle
 	set -o pipefail
-	./despeckle 20000 $B/$stem-thresh.pbm |
+	./despeckle 80000 $B/$stem-thresh.pbm |
         unblackedges > $target
 
 #regions-%:V: $B/monsters%-despeck.pbm $B/regions-monsters%.txt

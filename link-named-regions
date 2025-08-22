@@ -40,6 +40,8 @@ while read line; do
     # Construct source and target paths
     source_png="build/region${region_id}.png"
     target_png="named/${name}.png"
+    source_tex="build/region${region_id}.tex"
+    target_tex="named/${name}.tex"
     
     # Check if source PNG exists
     if [[ ! -f "$source_png" ]]; then
@@ -47,7 +49,7 @@ while read line; do
         continue
     fi
     
-    # Remove existing link if it exists
+    # Remove existing PNG link if it exists
     if [[ -L "$target_png" ]]; then
         rm "$target_png"
     elif [[ -f "$target_png" ]]; then
@@ -55,13 +57,34 @@ while read line; do
         continue
     fi
     
-    # Create symbolic link with relative path
+    # Remove existing TEX link if it exists
+    if [[ -L "$target_tex" ]]; then
+        rm "$target_tex"
+    elif [[ -f "$target_tex" ]]; then
+        print "Warning: $target_tex exists and is not a symbolic link, skipping" >&2
+        continue
+    fi
+    
+    # Create PNG symbolic link with relative path
     ln -s "../$source_png" "$target_png"
     
     if [[ $? -eq 0 ]]; then
         print "Created link: $target_png -> ../$source_png" >&2
     else
-        print "Error: failed to create link for $region_id ($name)" >&2
+        print "Error: failed to create PNG link for $region_id ($name)" >&2
+    fi
+    
+    # Create TEX symbolic link if source exists
+    if [[ -f "$source_tex" ]]; then
+        ln -s "../$source_tex" "$target_tex"
+        
+        if [[ $? -eq 0 ]]; then
+            print "Created link: $target_tex -> ../$source_tex" >&2
+        else
+            print "Error: failed to create TEX link for $region_id ($name)" >&2
+        fi
+    else
+        print "Warning: source file $source_tex not found for $region_id" >&2
     fi
     
 done < "$labels_file"
