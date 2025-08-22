@@ -79,8 +79,17 @@
 
 
 \begin{tikzpicture}
-  \draw [thick] (0,0) rectangle (250,150); % full tray
-  \draw [ultra thin] (3,3) rectangle (247,147); % full tray
+  \draw [thick] (-1,-1) rectangle +(250,153) % full tray
+                  +(0,3) rectangle +(249,150);
+
+  \draw [thick] (-1, 34.5) arc [start angle=-90, end angle=90, radius=8.5];
+
+  \draw [thick,fill=white] (-1, 57) ++(250,0) -- ++(-9,0)
+     arc [start angle=90, end angle=270, radius=9.5] -- ++(9,0)
+     -- ++(0, 19) -- cycle;
+
+%  \draw [thick,fill=white] (-1, 57) +(250,0) -- +(-9,0)
+%     arc [start angle=90, end angle=270, radius=9.5] +(0,0) -- +(9,0) -- cycle;
 
   \path (3.5, 109) coordinate (Ooze 1);
   \path (36, 109) coordinate (Ooze 2);
