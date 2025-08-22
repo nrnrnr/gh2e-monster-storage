@@ -56,6 +56,21 @@
   \draw [outline] (#2) \usepath{#3#1};
 }
 
+\newcommand\monsterx[3][]{%
+  \node [image,#1] at (#2) {\includegraphics{named/#3.png}};
+  \draw [outline,#1] (#2) \usepath{#3};
+}
+
+\newcommand\fullmonster[4]{% coordinate image path imageparms outlineparms
+  \node [image,#4] at (#1) {\includegraphics{named/#2.png}};
+  \draw [outline,#4] (#1) \usepath{#3};
+}
+
+\newcommand\xfullmonster[5]{% coordinate image path imageparms outlineparms gfxparms
+  \node [image,#4] at (#1) {\includegraphics[#5]{named/#2.png}};
+  \draw [outline,#4] (#1) \usepath{#3};
+}
+
 \newcommand\monster[2][]{\monsterbase[#1]{#2}{#2}}
 \newcommand\mone[2][]{\monsterbase[#1]{#2 1}{#2}}
 \newcommand\mtwo[2][]{\monsterbase[#1]{#2 2}{#2}}
@@ -64,57 +79,69 @@
 
 
 \begin{tikzpicture}
-  \draw (0,0) rectangle (250,150); % full tray
+  \draw [thick] (0,0) rectangle (250,150); % full tray
+  \draw [ultra thin] (3,3) rectangle (247,147); % full tray
 
-  \path (4,6) coordinate (Vermling Scout 1);
-  \path (32,6) coordinate (Vermling Scout 2);
-  \path (61,6) coordinate (Forest Imp 1);
-  \path (90,6) coordinate (Forest Imp 2);
-  \path (124,5) coordinate (City Guard);
-  \path (155,6) coordinate (Ancient Artillery);
-  \path (186,6) coordinate (Hound 1);
-  \path (215,6) coordinate (Hound 2);
+  \path (3.5, 109) coordinate (Ooze 1);
+  \path (36, 109) coordinate (Ooze 2);
 
-  \path (4, 50) coordinate (Inox Guard);
-  \path (44, 50) coordinate (Inox Priest);
-  \path (82, 53) coordinate (Inox Archer);
-  \path (123, 55) coordinate (City Archer);
-  \path (120, 80) coordinate (Vermling Priest);
+  \path (68.3, 108) coordinate (Deep Terror 1);
+  \path (99, 108) coordinate (Deep Terror 2);
+
+  \path (130, 109) coordinate (Giant Viper 1);
+  \path (159.5, 109) coordinate (Giant Viper 2);
+
+  \path (189, 110) coordinate (Black Imp 1);
+  \path (218.5, 110) coordinate (Black Imp 2);
+
+  \path (4, 48) coordinate (Inox Guard);
+  \path (44, 48) coordinate (Inox Priest);
+  \path (83, 50) coordinate (Inox Archer);
+  \path (125, 53) coordinate (City Archer);
+  \path (123, 77.5) coordinate (Vermling Priest);
+
 
   \path (168, 70) coordinate (Spitting Drake);
-  \path (166, 43) coordinate (Rending Drake);
+  \path (167.3, 40.3) coordinate (Rending Drake);
   \path (203, 58) coordinate (Lurker Soldier);
 
-  \path (4, 110) coordinate (Ooze 1);
-  \path (35, 110) coordinate (Ooze 2);
 
-  \path (68, 107) coordinate (Deep Terror 1);
-  \path (98, 107) coordinate (Deep Terror 2);
+  \path (3.2,3.3) coordinate (Vermling Scout 1);
+  \path (32,3.3) coordinate (Vermling Scout 2);
+  \path (61.5,3.5) coordinate (Forest Imp 1);
+  \path (90.5,3.3) coordinate (Forest Imp 2);
+  \path (124,3.1) coordinate (City Guard);
+  \path (156.5,3) coordinate (Ancient Artillery);
 
-  \path (128, 110) coordinate (Giant Viper 1);
-  \path (156, 110) coordinate (Giant Viper 2);
-
-  \path (183, 110) coordinate (Black Imp 1);
-  \path (218, 110) coordinate (Black Imp 2);
+  \path (189,2.8) coordinate (Hound 1);
+  \path (219,2.8) coordinate (Hound 2);
 
 
-  \mone{Vermling Scout}
-  \mtwo{Vermling Scout}
+
+
+\fullmonster{Vermling Scout 1}{Vermling Scout}{Vermling Scout}{angle=-2}
+\fullmonster{Vermling Scout 2}{Vermling Scout}{Vermling Scout}{angle=-2}
+
+
   \mone[ angle=180]{Forest Imp}
 
 
 
 %  \begin{scope}[rotate around={180:(500,500)}] \mone{Forest Imp}
 %  \end{scope}
-  \mtwo{Forest Imp}
+  \fullmonster{Forest Imp 2}{Forest Imp}{Forest Imp}{angle=-1.5}
+
+%  \mtwo{Forest Imp}
   \monster{City Guard}
 
    \monster{Ancient Artillery};
-   \monsterpair{Hound};
-   \monster{Inox Guard};
-   \monster{Inox Priest};
-   \monster{Inox Archer};
-   \monster[ angle=90]{Vermling Priest};
+   \fullmonster{Hound 1}{Hound}{Hound}{angle=2}
+   \fullmonster{Hound 2}{Hound}{Hound}{angle=2}
+   \monster{Inox Guard}
+   \monster{Inox Priest}
+   \monster{Inox Archer}
+   \xfullmonster{Vermling Priest}{Vermling Priest}{Vermling Priest angle=90}{angle=5}{angle=90}
+%   \monster[ angle=90]{Vermling Priest}
 
 
 %\monster{Frost Demon}
@@ -128,7 +155,10 @@
 \monsterpair{Black Imp}
 \monster{Lurker Soldier}
 \monsterpair{Ooze}
-\monsterpair{Deep Terror}
+%\monsterpair{Deep Terror}
+
+\fullmonster{Deep Terror 1}{Deep Terror}{Deep Terror}{angle=-2}
+\fullmonster{Deep Terror 2}{Deep Terror}{Deep Terror}{angle=-2}
 
 \monster[ angle=90]{Rending Drake}
 \monster{Spitting Drake}
