@@ -1,0 +1,69 @@
+#!/bin/ksh
+
+# Create symbolic links to region PNGs with descriptive names
+# Usage: link-named-regions labels.txt
+
+if [[ $# -ne 1 ]]; then
+    print "Usage: link-named-regions labels.txt" >&2
+    exit 1
+fi
+
+labels_file="$1"
+
+if [[ ! -f "$labels_file" ]]; then
+    print "Error: labels file $labels_file not found" >&2
+    exit 1
+fi
+
+# Create named subdirectory if it doesn't exist
+if [[ ! -d "named" ]]; then
+    mkdir -p named
+    print "Created directory: named" >&2
+fi
+
+# Process each line in labels.txt
+while read line; do
+    # Skip empty lines and comments
+    if [[ -z "$line" || "$line" =~ ^# ]]; then
+        continue
+    fi
+    
+    # Extract region ID and name
+    region_id=$(echo "$line" | awk '{print $1}')
+    name=$(echo "$line" | cut -d' ' -f2-)
+    
+    if [[ -z "$region_id" || -z "$name" ]]; then
+        print "Warning: skipping malformed line: $line" >&2
+        continue
+    fi
+    
+    # Construct source and target paths
+    source_png="build/region${region_id}.png"
+    target_png="named/${name}.png"
+    
+    # Check if source PNG exists
+    if [[ ! -f "$source_png" ]]; then
+        print "Warning: source file $source_png not found, skipping $region_id" >&2
+        continue
+    fi
+    
+    # Remove existing link if it exists
+    if [[ -L "$target_png" ]]; then
+        rm "$target_png"
+    elif [[ -f "$target_png" ]]; then
+        print "Warning: $target_png exists and is not a symbolic link, skipping" >&2
+        continue
+    fi
+    
+    # Create symbolic link with relative path
+    ln -s "../$source_png" "$target_png"
+    
+    if [[ $? -eq 0 ]]; then
+        print "Created link: $target_png -> ../$source_png" >&2
+    else
+        print "Error: failed to create link for $region_id ($name)" >&2
+    fi
+    
+done < "$labels_file"
+
+print "Finished processing labels file" >&2
