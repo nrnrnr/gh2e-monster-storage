@@ -5,7 +5,11 @@
 \newcommand\defpath[2]{%
   \expandafter\def\csname path-#1\endcsname{#2}}
 \newcommand\usepath[1]{%
-  \csname path-#1\endcsname}
+  \expandafter\ifx\csname path-#1\endcsname\undefined
+     \GenericError{}{Path #1 is not defined}{Check spelling}{}
+  \else
+    \csname path-#1\endcsname
+  \fi}
 \newcommand\setdpi[2]{%
   \expandafter\def\csname dpi-#1\endcsname{#2}}
 \newcommand\usedpi[1]{%
@@ -36,16 +40,17 @@
   outline/.style={
     ultra thick,
   },
+  angle/.forward to=/tikz/rotate,
 }
 
-\newcommand\monsterbase[2]{%
-  \node [image] at (#1) {\includegraphics{named/#2.png}};
-  \draw [outline] (#1) \usepath{#2};
+\newcommand\monsterbase[3][]{%
+  \node [image] at (#2) {\includegraphics[#1]{named/#3.png}};
+  \draw [outline] (#2) \usepath{#3};
 }
 
-\newcommand\monster[2][]{\monsterbase{#2}{#2}}
-\newcommand\mone[2][]{\monsterbase{#2 1}{#2}}
-\newcommand\mtwo[2][]{\monsterbase{#2 2}{#2}}
+\newcommand\monster[2][]{\monsterbase[#1]{#2}{#2}}
+\newcommand\mone[2][]{\monsterbase[#1]{#2 1}{#2}}
+\newcommand\mtwo[2][]{\monsterbase[#1]{#2 2}{#2}}
 
 
 \begin{tikzpicture}
@@ -56,12 +61,27 @@
   \path (32,6) coordinate (Vermling Scout 2);
   \path (61,6) coordinate (Forest Imp 1);
   \path (90,6) coordinate (Forest Imp 2);
-  \path (124,6) coordinate (City Guard);
+  \path (124,5) coordinate (City Guard);
+  \path (155,6) coordinate (Ancient Artillery);
+  \path (186,6) coordinate (Hound 1);
+  \path (186,6) coordinate (Hound 2);
+
+  \path (4, 50) coordinate (Inox Guard);
+  \path (44, 50) coordinate (Inox Priest);
+  \path (123, 55) coordinate (City Archer);
+  \path (120, 80) coordinate (Vermling Priest);
 
   \monster{Frost Demon}
   \mone{Vermling Scout}
   \mtwo{Vermling Scout}
-  \mone{Forest Imp}
+  \mone[angle=180]{Forest Imp}
+  \draw[outline,red] (Forest Imp 1) \usepath{Forest Imp angle=180};
+
+  \draw[outline,blue] (0,0) \usepath{Forest Imp frog};
+  \draw[outline,green] (0,0) \usepath{Forest Imp};
+
+%  \begin{scope}[rotate around={180:(500,500)}] \mone{Forest Imp}
+%  \end{scope}
   \mtwo{Forest Imp}
   \monster{City Guard}
 
