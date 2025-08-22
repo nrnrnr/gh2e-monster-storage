@@ -12,6 +12,11 @@ fi
 input="$2"
 threshold="$1"
 
+if [[ -z "$threshold" ]]; then
+  echo "Missing threshhold" >&2
+  exit 1
+fi
+
 if [[ "$input" == *.png ]]; then
     pngtopnm "$input"
 elif [[ "$input" == *.jpg ]] || [[ "$input" == *.jpeg ]]; then
