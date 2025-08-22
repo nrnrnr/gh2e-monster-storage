@@ -18,6 +18,14 @@
   \expandafter\def\csname unit-#1\endcsname{#2}}
 \newcommand\useunit[1]{%
   \csname unit-#1\endcsname}
+\newcommand\setwidth[2]{%
+  \expandafter\def\csname width-#1\endcsname{#2}}
+\newcommand\usewidth[1]{%
+  \csname width-#1\endcsname}
+\newcommand\setheight[2]{%
+  \expandafter\def\csname height-#1\endcsname{#2}}
+\newcommand\useheight[1]{%
+  \csname height-#1\endcsname}
 
 \newcommand\image[1]{%
   \includegraphics{build/region#1.png}}
@@ -52,11 +60,12 @@
 \newcommand\mone[2][]{\monsterbase[#1]{#2 1}{#2}}
 \newcommand\mtwo[2][]{\monsterbase[#1]{#2 2}{#2}}
 
+\newcommand\monsterpair[2][]{\mone[#1]{#2}\mtwo[#1]{#2}}
+
 
 \begin{tikzpicture}
   \draw (0,0) rectangle (250,150); % full tray
 
-  \path (20,20) coordinate (Frost Demon);
   \path (4,6) coordinate (Vermling Scout 1);
   \path (32,6) coordinate (Vermling Scout 2);
   \path (61,6) coordinate (Forest Imp 1);
@@ -68,10 +77,27 @@
 
   \path (4, 50) coordinate (Inox Guard);
   \path (44, 50) coordinate (Inox Priest);
+  \path (82, 53) coordinate (Inox Archer);
   \path (123, 55) coordinate (City Archer);
   \path (120, 80) coordinate (Vermling Priest);
 
-  \monster{Frost Demon}
+  \path (168, 70) coordinate (Spitting Drake);
+  \path (166, 43) coordinate (Rending Drake);
+  \path (203, 58) coordinate (Lurker Soldier);
+
+  \path (4, 110) coordinate (Ooze 1);
+  \path (35, 110) coordinate (Ooze 2);
+
+  \path (68, 107) coordinate (Deep Terror 1);
+  \path (98, 107) coordinate (Deep Terror 2);
+
+  \path (128, 110) coordinate (Giant Viper 1);
+  \path (156, 110) coordinate (Giant Viper 2);
+
+  \path (183, 110) coordinate (Black Imp 1);
+  \path (218, 110) coordinate (Black Imp 2);
+
+
   \mone{Vermling Scout}
   \mtwo{Vermling Scout}
   \mone[ angle=180]{Forest Imp}
@@ -84,12 +110,48 @@
   \monster{City Guard}
 
    \monster{Ancient Artillery};
-   \mone{Hound};
-   \mtwo{Hound};
-%   \monster{Inox Guard};
-%   \monster{Inox Priest};
-%   \monster{City Archer};
-%   \monster{Vermling Priest};
+   \monsterpair{Hound};
+   \monster{Inox Guard};
+   \monster{Inox Priest};
+   \monster{Inox Archer};
+   \monster[ angle=90]{Vermling Priest};
+
+
+%\monster{Frost Demon}
+%\monster{Flame Demon}
+%\monster{Earth Demon}
+%\monster{Sun Demon}
+%\monster{Wind Demon}
+%\monster{Bandit Archer}
+
+\monsterpair{Giant Viper}
+\monsterpair{Black Imp}
+\monster{Lurker Soldier}
+\monsterpair{Ooze}
+\monsterpair{Deep Terror}
+
+\monster[ angle=90]{Rending Drake}
+\monster{Spitting Drake}
+\monster{City Guard}
+\monster[ angle=90]{City Archer}
+\monster{Ancient Artillery}
+
+%\monster{Bandit Scout}
+%\monster{Living Bones}
+%\monster{Cultist}
+%\monster{Living Corpse}
+%\monster{Living Spirit}
+%\monster{Night Demon}
+%\monster{Chaos Demon}
+%\monster{Forest Imp}
+%\monster{Vermling Scout}
+%\monster{Deep Terror}
+%\monster{Stone Construct}
+%\monster{Cave Bear}
+%\monster{Savvas Lavaflow}
+%\monster{Savvas Icestorm}
+%\monster{Harrower Infester}
+%\monster{Crystal Rot}
 
 
 %  \draw[ultra thick,x=0.058mm,y=0.058mm] (0, 0)

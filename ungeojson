@@ -150,20 +150,48 @@ local function emit_tikz(polys, filename, dpi)
     return min_x, min_y, max_x, max_y
   end
   
+  -- Helper function to output width and height for a path variant
+  local function output_dimensions(macro, suffix, min_x, min_y, max_x, max_y)
+    local width = mm(max_x - min_x)
+    local height = mm(max_y - min_y)
+    println([[\setwidth{%s%s}{%g}]], macro, suffix, width)
+    println([[\setheight{%s%s}{%g}]], macro, suffix, height)
+  end
+  
   -- Original path (no transformation)
+  local min_x_orig, min_y_orig, max_x_orig, max_y_orig = find_bbox(polys, function(x, y) return x, y end)
   local pieces = build_pieces(polys, function(x, y) return x, y end)
   
+  -- Rotated path (90 degrees with bounding box adjustment)
+  local min_x_90, min_y_90, max_x_90, max_y_90 = find_bbox(polys, function(x, y) return -y, x end)
+  local pieces_90 = build_pieces(polys, function(x, y) 
+    return -y - min_x_90, x - min_y_90
+  end)
+  
+  -- Rotated path (-90 degrees with bounding box adjustment)
+  local min_x_neg90, min_y_neg90, max_x_neg90, max_y_neg90 = find_bbox(polys, function(x, y) return y, -x end)
+  local pieces_neg90 = build_pieces(polys, function(x, y) 
+    return y - min_x_neg90, -x - min_y_neg90
+  end)
+  
   -- Rotated path (180 degrees with bounding box adjustment)
-  local min_x, min_y, max_x, max_y = find_bbox(polys, function(x, y) return -x, -y end)
-  local pieces_rotated = build_pieces(polys, function(x, y) 
-    return -x - min_x, -y - min_y
+  local min_x_180, min_y_180, max_x_180, max_y_180 = find_bbox(polys, function(x, y) return -x, -y end)
+  local pieces_180 = build_pieces(polys, function(x, y) 
+    return -x - min_x_180, -y - min_y_180
   end)
   
   local macro = filename:gsub('^.*/', ''):gsub('region', ''):gsub('%.json$', '')
   println([[\setdpi{%s}{%g}]], macro, dpi)
   println([[\setunit{%s}{%g}]], macro, 1.0 / dpi)
+  
+  -- Output dimensions for original only
+  output_dimensions(macro, "", min_x_orig, min_y_orig, max_x_orig, max_y_orig)
+  
+  -- Output path definitions
   println([[\defpath{%s}{%s}]], macro, table.concat(pieces, " "))
-  println([[\defpath{%s angle=180}{%s}]], macro, table.concat(pieces_rotated, " "))
+  println([[\defpath{%s angle=90}{%s}]], macro, table.concat(pieces_90, " "))
+  println([[\defpath{%s angle=-90}{%s}]], macro, table.concat(pieces_neg90, " "))
+  println([[\defpath{%s angle=180}{%s}]], macro, table.concat(pieces_180, " "))
 end
 
 local function emit_openscad(polys)
