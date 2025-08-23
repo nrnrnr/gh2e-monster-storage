@@ -115,15 +115,16 @@
   \path (203, 58) coordinate (Lurker Soldier);
 
 
+  % bottom row, tray 1
   \path (3.2,3.3) coordinate (Vermling Scout 1);
   \path (32,3.3) coordinate (Vermling Scout 2);
   \path (61.5,3.5) coordinate (Forest Imp 1);
   \path (90.5,3.3) coordinate (Forest Imp 2);
   \path (124,3.1) coordinate (City Guard);
   \path (156.5,3) coordinate (Ancient Artillery);
-
   \path (189,2.8) coordinate (Hound 1);
   \path (219,2.8) coordinate (Hound 2);
+  % end of bottom row
 
 
 
@@ -133,14 +134,8 @@
 
 
   \mone[ angle=180]{Forest Imp}
-
-
-
-%  \begin{scope}[rotate around={180:(500,500)}] \mone{Forest Imp}
-%  \end{scope}
   \fullmonster{Forest Imp 2}{Forest Imp}{Forest Imp}{angle=-1.5}
 
-%  \mtwo{Forest Imp}
   \monster{City Guard}
 
    \monster{Ancient Artillery};
@@ -150,21 +145,13 @@
    \monster{Inox Priest}
    \monster{Inox Archer}
    \xfullmonster{Vermling Priest}{Vermling Priest}{Vermling Priest angle=90}{angle=5}{angle=90}
-%   \monster[ angle=90]{Vermling Priest}
 
 
-%\monster{Frost Demon}
-%\monster{Flame Demon}
-%\monster{Earth Demon}
-%\monster{Sun Demon}
-%\monster{Wind Demon}
-%\monster{Bandit Archer}
 
 \monsterpair{Giant Viper}
 \monsterpair{Black Imp}
 \monster{Lurker Soldier}
 \monsterpair{Ooze}
-%\monsterpair{Deep Terror}
 
 \fullmonster{Deep Terror 1}{Deep Terror}{Deep Terror}{angle=-2}
 \fullmonster{Deep Terror 2}{Deep Terror}{Deep Terror}{angle=-2}
@@ -175,42 +162,64 @@
 \monster[ angle=90]{City Archer}
 \monster{Ancient Artillery}
 
-%\monster{Bandit Scout}
-%\monster{Living Bones}
-%\monster{Cultist}
-%\monster{Living Corpse}
-%\monster{Living Spirit}
-%\monster{Night Demon}
-%\monster{Chaos Demon}
-%\monster{Forest Imp}
-%\monster{Vermling Scout}
-%\monster{Deep Terror}
-%\monster{Stone Construct}
-%\monster{Cave Bear}
-%\monster{Savvas Lavaflow}
-%\monster{Savvas Icestorm}
-%\monster{Harrower Infester}
-%\monster{Crystal Rot}
-
-
 %  \draw[ultra thick,x=0.058mm,y=0.058mm] (0, 0)
 %     node [anchor=south west] {\image{A01}} \usepath{A01};
 \end{tikzpicture}
 
 
-%%\begin{tikzpicture}
-%%
-%%\draw (0,0) rectangle (250,150); % full tray
-%%
-%%  \path (20,20) coordinate (Frost Demon);
-%%  \path (4,6) coordinate (Vermling Scout 1);
-%%  \path (32,6) coordinate (Vermling Scout 2);
-%%
-%%  \monster{Frost Demon}
-%%  \mone{Vermling Scout}
-%%  \mtwo{Vermling Scout}
-%%
-%%\end{tikzpicture}
+\begin{tikzpicture}
+  \draw [thick] (-2, 200) rectangle +(250,150) % full tray
+                  +(0,3) rectangle +(249,147);
+
+  \draw [thick] (-2, 26) arc [start angle=-90, end angle=90, radius=4];
+
+  \path (  3, 297) coordinate (Living Corpse);
+  \path ( 35, 297) coordinate (Cultist);
+  \path ( 68, 297) coordinate (Bandit Archer);
+  \path (103, 303) coordinate (Bandit Scout);
+
+  \path (138, 302) coordinate (Crystal Rot);
+  \path (168, 301) coordinate (Cave Bear);
+  \path (217, 295) coordinate (Harrower Infester);
+
+  \path (  8, 255) coordinate (Living Bones 1);
+  \path ( 36, 255) coordinate (Living Bones 2);
+  \path ( 70, 255) coordinate (Living Spirit);
+  \path (104, 263) coordinate (Chaos Demon);
+  \path (154, 253) coordinate (Frost Demon);
+  \path (191, 250) coordinate (Stone Construct);
+
+  \path (  3, 205) coordinate (Wind Demon);
+  \path ( 36, 205) coordinate (Night Demon);
+  \path ( 72, 205) coordinate (Flame Demon);
+  \path (104, 205) coordinate (Earth Demon);
+  \path (147, 205) coordinate (Sun Demon);
+
+  \path (184, 205) coordinate (Savvas Lavaflow);
+  \path (218, 205) coordinate (Savvas Icestorm);
+
+
+  \monster{Frost Demon}
+  \monster{Flame Demon}
+  \monster{Earth Demon}
+  \monster{Sun Demon}
+  \monster{Wind Demon}
+  \monster{Bandit Archer}
+  \monster{Bandit Scout}
+  \monsterpair{Living Bones}
+  \monster{Cultist}
+  \monster{Living Corpse}
+  \monster{Living Spirit}
+  \monster{Night Demon}
+  \monster{Chaos Demon}
+  \monster{Stone Construct}
+  \monster{Cave Bear}
+  \monster{Savvas Lavaflow}
+  \monster{Savvas Icestorm}
+  \monster{Harrower Infester}
+  \monster{Crystal Rot}
+
+\end{tikzpicture}
 
 \end{center}
 \end{document}
