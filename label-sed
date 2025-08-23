@@ -1,0 +1,110 @@
+#!/bin/ksh
+
+sed    -e 's/region W01/Frost Demon/' \
+    -e 's/{W01}/{Frost Demon}/' \
+    -e 's/{W01 /{Frost Demon /' \
+    -e 's/region W02/Flame Demon/' \
+    -e 's/{W02}/{Flame Demon}/' \
+    -e 's/{W02 /{Flame Demon /' \
+    -e 's/region W03/Earth Demon/' \
+    -e 's/{W03}/{Earth Demon}/' \
+    -e 's/{W03 /{Earth Demon /' \
+    -e 's/region W04/Sun Demon/' \
+    -e 's/{W04}/{Sun Demon}/' \
+    -e 's/{W04 /{Sun Demon /' \
+    -e 's/region W05/Wind Demon/' \
+    -e 's/{W05}/{Wind Demon}/' \
+    -e 's/{W05 /{Wind Demon /' \
+    -e 's/region W07/Inox Guard/' \
+    -e 's/{W07}/{Inox Guard}/' \
+    -e 's/{W07 /{Inox Guard /' \
+    -e 's/region W08/Bandit Archer/' \
+    -e 's/{W08}/{Bandit Archer}/' \
+    -e 's/{W08 /{Bandit Archer /' \
+    -e 's/region W09/Inox Priest/' \
+    -e 's/{W09}/{Inox Priest}/' \
+    -e 's/{W09 /{Inox Priest /' \
+    -e 's/region W10/Vermling Priest/' \
+    -e 's/{W10}/{Vermling Priest}/' \
+    -e 's/{W10 /{Vermling Priest /' \
+    -e 's/region W11/Inox Archer/' \
+    -e 's/{W11}/{Inox Archer}/' \
+    -e 's/{W11 /{Inox Archer /' \
+    -e 's/region X01/Giant Viper/' \
+    -e 's/{X01}/{Giant Viper}/' \
+    -e 's/{X01 /{Giant Viper /' \
+    -e 's/region X02/Black Imp/' \
+    -e 's/{X02}/{Black Imp}/' \
+    -e 's/{X02 /{Black Imp /' \
+    -e 's/region X03/Lurker Soldier/' \
+    -e 's/{X03}/{Lurker Soldier}/' \
+    -e 's/{X03 /{Lurker Soldier /' \
+    -e 's/region X04/Ooze/' \
+    -e 's/{X04}/{Ooze}/' \
+    -e 's/{X04 /{Ooze /' \
+    -e 's/region X05/Hound/' \
+    -e 's/{X05}/{Hound}/' \
+    -e 's/{X05 /{Hound /' \
+    -e 's/region X07/Rending Drake/' \
+    -e 's/{X07}/{Rending Drake}/' \
+    -e 's/{X07 /{Rending Drake /' \
+    -e 's/region X08/Spitting Drake/' \
+    -e 's/{X08}/{Spitting Drake}/' \
+    -e 's/{X08 /{Spitting Drake /' \
+    -e 's/region X09/City Guard/' \
+    -e 's/{X09}/{City Guard}/' \
+    -e 's/{X09 /{City Guard /' \
+    -e 's/region X10/City Archer/' \
+    -e 's/{X10}/{City Archer}/' \
+    -e 's/{X10 /{City Archer /' \
+    -e 's/region X11/Ancient Artillery/' \
+    -e 's/{X11}/{Ancient Artillery}/' \
+    -e 's/{X11 /{Ancient Artillery /' \
+    -e 's/region Y01/Bandit Scout/' \
+    -e 's/{Y01}/{Bandit Scout}/' \
+    -e 's/{Y01 /{Bandit Scout /' \
+    -e 's/region Y02/Living Bones/' \
+    -e 's/{Y02}/{Living Bones}/' \
+    -e 's/{Y02 /{Living Bones /' \
+    -e 's/region Y03/Cultist/' \
+    -e 's/{Y03}/{Cultist}/' \
+    -e 's/{Y03 /{Cultist /' \
+    -e 's/region Y04/Living Corpse/' \
+    -e 's/{Y04}/{Living Corpse}/' \
+    -e 's/{Y04 /{Living Corpse /' \
+    -e 's/region Y05/Living Spirit/' \
+    -e 's/{Y05}/{Living Spirit}/' \
+    -e 's/{Y05 /{Living Spirit /' \
+    -e 's/region Y07/Night Demon/' \
+    -e 's/{Y07}/{Night Demon}/' \
+    -e 's/{Y07 /{Night Demon /' \
+    -e 's/region Y08/Chaos Demon/' \
+    -e 's/{Y08}/{Chaos Demon}/' \
+    -e 's/{Y08 /{Chaos Demon /' \
+    -e 's/region Y09/Forest Imp/' \
+    -e 's/{Y09}/{Forest Imp}/' \
+    -e 's/{Y09 /{Forest Imp /' \
+    -e 's/region Y10/Vermling Scout/' \
+    -e 's/{Y10}/{Vermling Scout}/' \
+    -e 's/{Y10 /{Vermling Scout /' \
+    -e 's/region Y11/Deep Terror/' \
+    -e 's/{Y11}/{Deep Terror}/' \
+    -e 's/{Y11 /{Deep Terror /' \
+    -e 's/region Z01/Stone Construct/' \
+    -e 's/{Z01}/{Stone Construct}/' \
+    -e 's/{Z01 /{Stone Construct /' \
+    -e 's/region Z02/Cave Bear/' \
+    -e 's/{Z02}/{Cave Bear}/' \
+    -e 's/{Z02 /{Cave Bear /' \
+    -e 's/region Z03/Savvas Lavaflow/' \
+    -e 's/{Z03}/{Savvas Lavaflow}/' \
+    -e 's/{Z03 /{Savvas Lavaflow /' \
+    -e 's/region Z05/Savvas Icestorm/' \
+    -e 's/{Z05}/{Savvas Icestorm}/' \
+    -e 's/{Z05 /{Savvas Icestorm /' \
+    -e 's/region Z06/Harrower Infester/' \
+    -e 's/{Z06}/{Harrower Infester}/' \
+    -e 's/{Z06 /{Harrower Infester /' \
+    -e 's/region Z07/Crystal Rot/' \
+    -e 's/{Z07}/{Crystal Rot}/' \
+    -e 's/{Z07 /{Crystal Rot /'

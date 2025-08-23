@@ -1,5 +1,53 @@
 #!/bin/ksh
 
+# Function to downsample PNG while preserving alpha channel and physical dimensions
+# Usage: downsample_png factor [input_file]
+# If input_file is omitted, reads from stdin
+# Writes downsampled PNG to stdout
+downsample_png() {
+    typeset factor="$1"
+    typeset input="$2"
+    typeset temp_input=""
+    
+    # If no input file specified, read from stdin to temporary file
+    if [[ -z "$input" ]]; then
+        temp_input=$(mktemp --suffix=.png)
+        cat > "$temp_input"
+        input="$temp_input"
+    fi
+    
+    # Get current resolution metadata
+    typeset resolution x_res y_res units new_x_res new_y_res resolution_args
+    resolution=$(identify -format "%x %y %U" "$input" 2>/dev/null)
+    if [[ -n "$resolution" ]]; then
+        # Parse resolution (e.g., "150 150 PixelsPerInch")
+        set -- $resolution
+        x_res="$1"
+        y_res="$2" 
+        units="$3"
+        
+        # Calculate new resolution (divide by factor to maintain physical size)
+        new_x_res=$(lua5.1 -e "print(math.floor($x_res / $factor))")
+        new_y_res=$(lua5.1 -e "print(math.floor($y_res / $factor))")
+        
+        resolution_args="-density ${new_x_res}x${new_y_res} -units $units"
+    else
+        resolution_args=""
+    fi
+
+    # Downsample while preserving alpha
+    # Output to stdout
+    convert "$input" \
+        -resize $(lua5.1 -e "print(string.format('%.1f%%', 100.0 / $factor))") \
+        $resolution_args \
+        png:- 2>/dev/null
+    
+    # Clean up temporary file if we created one
+    if [[ -n "$temp_input" ]]; then
+        rm -f "$temp_input"
+    fi
+}
+
 case $# in
   2) ;;
   *) echo "Usage: $(basename $0) original.pbm regionfile" >&2; exit 1 ;;
@@ -33,7 +81,14 @@ do
     pnminvert "$outbase.pbm" > "$mask"
     djpeg "$jpg" |   # bogus, need dimension before embiggening?
     pnmcut -left $left -right $right -top $top -bottom $bottom |
-    pnmtopng -size="$ppm $ppm 1" -alpha="$mask" > "$outbase.png"
+    pnmtopng -size="$ppm $ppm 1" -alpha="$mask" |
+    downsample_png 4 > "$outbase.png"
+    
+    # Optionally create downsampled versions:
+    # With file argument: downsample_png 2 "$outbase.png" > "${outbase}-2x.png"
+    # Or in pipeline: cat "$outbase.png" | downsample_png 2 > "${outbase}-2x.png"
+    # Or replace original: pnmtopng -size="$ppm $ppm 1" -alpha="$mask" | downsample_png 2 > "$outbase.png"
+    
     rm -f "$mask"
   } &
 

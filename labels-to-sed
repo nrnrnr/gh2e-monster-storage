@@ -1,0 +1,70 @@
+#!/bin/ksh
+
+# Generate sed script from labels file
+# Usage: labels-to-sed labels.txt
+
+if [[ $# -ne 1 ]]; then
+    print "Usage: labels-to-sed labels.txt" >&2
+    exit 1
+fi
+
+labels_file="$1"
+
+if [[ ! -f "$labels_file" ]]; then
+    print "Error: labels file $labels_file not found" >&2
+    exit 1
+fi
+
+output_script="label-sed"
+
+# Start the sed script
+print "#!/bin/ksh" > "$output_script"
+print "" >> "$output_script"
+
+# Start the sed command
+print -n "sed" >> "$output_script"
+
+first_line=true
+
+# Process each line in labels.txt
+while read line; do
+    # Skip empty lines and comments
+    if [[ -z "$line" || "$line" =~ ^# ]]; then
+        continue
+    fi
+    
+    # Extract region ID and name
+    region_id=$(echo "$line" | awk '{print $1}')
+    name=$(echo "$line" | cut -d' ' -f2-)
+    
+    if [[ -z "$region_id" || -z "$name" ]]; then
+        print "Warning: skipping malformed line: $line" >&2
+        continue
+    fi
+    
+    # Escape any special characters in the name for sed
+    escaped_name=$(echo "$name" | sed 's/[\/&]/\\&/g')
+    
+    # Add line continuation and sed expression for "region XXX"
+    if [[ "$first_line" = true ]]; then
+        print "    -e 's/region $region_id/$escaped_name/' \\" >> "$output_script"
+        first_line=false
+    else
+        print "    -e 's/region $region_id/$escaped_name/' \\" >> "$output_script"
+    fi
+    
+    # Add sed expression for LaTeX arguments "{XXX}"
+    print "    -e 's/{$region_id}/{$escaped_name}/' \\" >> "$output_script"
+    
+    # Add sed expression for LaTeX arguments "{XXX" (without closing brace)
+    print "    -e 's/{$region_id /{$escaped_name /' \\" >> "$output_script"
+    
+done < "$labels_file"
+
+# Remove the trailing backslash from the last line
+sed -i '$ s/ \\$//' "$output_script"
+
+# Make the output script executable
+chmod +x "$output_script"
+
+print "Generated sed script: $output_script" >&2

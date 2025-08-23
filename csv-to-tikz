@@ -1,0 +1,133 @@
+#!/bin/ksh
+
+# Generate TikZ coordinates from CSV polygon data
+# Usage: csv-to-tikz results.csv
+
+if [[ $# -ne 1 ]]; then
+    print "Usage: csv-to-tikz results.csv" >&2
+    exit 1
+fi
+
+csv_file="$1"
+
+if [[ ! -f "$csv_file" ]]; then
+    print "Error: CSV file $csv_file not found" >&2
+    exit 1
+fi
+
+# Function to process a single scene
+process_scene() {
+    scene="$1"
+    basename=$(basename "$scene" .jpg)
+    output_file="build/$basename-tikz.tex"
+    
+    # Extract scene letter (A, B, C, etc.) from basename
+    scene_letter=$(echo "$basename" | sed 's/.*\([A-Z]\)$/\1/')
+    
+    # Look for metrics files to get pixels per mm
+    ppm_file="ppm${scene_letter}.int"
+    if [[ ! -f "$ppm_file" ]]; then
+        print "Warning: metrics file $ppm_file not found for scene $scene, skipping" >&2
+        return
+    fi
+    
+    ppm=$(cat "$ppm_file")
+    if [[ -z "$ppm" || "$ppm" -eq 0 ]]; then
+        print "Warning: invalid pixels per meter value in $ppm_file" >&2
+        return
+    fi
+    
+    # Convert pixels per meter to pixels per mm
+    pixels_per_mm=$((ppm / 1000))
+    
+    # Get image height for Y-axis flipping
+    image_file="$scene"
+    if [[ ! -f "$image_file" ]]; then
+        # Try without directory prefix
+        image_file="$basename.jpg"
+    fi
+    
+    if [[ ! -f "$image_file" ]]; then
+        print "Warning: image file not found for $scene" >&2
+        return
+    fi
+    
+    image_height=$(identify -format "%h" "$image_file")
+    if [[ -z "$image_height" ]]; then
+        print "Warning: could not get image height for $image_file" >&2
+        return
+    fi
+    
+    print "Processing scene: $scene -> $output_file" >&2
+    print "Pixels per mm: $pixels_per_mm, Image height: $image_height" >&2
+    
+    # Start output file
+    > "$output_file"
+    
+    # Process lines for this scene from CSV
+    tail -n +2 "$csv_file" | while read line; do
+        # Extract scene name from this line
+        line_scene=$(echo "$line" | awk -F',' '{print $1}')
+        
+        # Skip if this line is not for our current scene
+        if [[ "$line_scene" != "$scene" ]]; then
+            continue
+        fi
+        
+        # Extract template and poly fields
+        template=$(echo "$line" | awk -F',' '{print $2}')
+        poly=$(echo "$line" | awk -F'"' '{print $2}')
+        
+        # Extract region name (A01, A02, etc.)
+        region_name=$(basename "$template" .png | sed 's/region//')
+        
+        # Parse polygon coordinates
+        coords=$(echo "$poly" | sed 's/\[\[//g' | sed 's/\]\]//g' | sed 's/\], \[/;/g' | sed 's/\[//g' | sed 's/\]//g')
+        
+        # Find bounding box (min X, max Y for lower left)
+        min_x=""
+        max_y=""
+        
+        echo "$coords" | tr ';' '\n' | while IFS=',' read x y; do
+            # Clean up whitespace
+            x=$(echo "$x" | tr -d ' ')
+            y=$(echo "$y" | tr -d ' ')
+            
+            if [[ -n "$x" && -n "$y" ]]; then
+                # Convert to integers for comparison
+                x_int=${x%.*}
+                y_int=${y%.*}
+                
+                if [[ -z "$min_x" || "$x_int" -lt "$min_x" ]]; then
+                    min_x="$x"
+                fi
+                if [[ -z "$max_y" || "$y_int" -gt "$max_y" ]]; then
+                    max_y="$y"
+                fi
+            fi
+        done
+        
+        if [[ -n "$min_x" && -n "$max_y" ]]; then
+            # Convert pixels to mm
+            x_mm=$(lua5.1 -e "print(string.format('%.2f', $min_x / $pixels_per_mm))")
+            
+            # Flip Y coordinate and convert to mm
+            flipped_y=$((image_height - ${max_y%.*}))
+            y_mm=$(lua5.1 -e "print(string.format('%.2f', $flipped_y / $pixels_per_mm))")
+            
+            # Generate TikZ path
+            echo "\\path ($x_mm,$y_mm) coordinate (region $region_name);" >> "$output_file"
+        fi
+    done
+    
+    chmod +w "$output_file"
+    print "Created TikZ coordinates file: $output_file" >&2
+}
+
+# Get unique scenes from CSV (skip header)
+scenes=$(tail -n +2 "$csv_file" | awk -F',' '{print $1}' | sort | uniq)
+
+# Process each unique scene
+for scene in $scenes; do
+    process_scene "$scene"
+done
