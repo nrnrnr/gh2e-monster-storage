@@ -71,11 +71,19 @@
   \draw [outline,#4] (#1) \usepath{#3};
 }
 
+\newcommand\tiltmonster[2][]{%
+   \monsterx[#1]{#2}{#2}}
+
 \newcommand\monster[2][]{\monsterbase[#1]{#2}{#2}}
 \newcommand\mone[2][]{\monsterbase[#1]{#2 1}{#2}}
 \newcommand\mtwo[2][]{\monsterbase[#1]{#2 2}{#2}}
 
 \newcommand\monsterpair[2][]{\mone[#1]{#2}\mtwo[#1]{#2}}
+
+\newcommand\tiltmone[2][]{%
+  \monsterx[#1]{#2 1}{#2}}
+\newcommand\tiltmtwo[2][]{%
+  \monsterx[#1]{#2 2}{#2}}
 
 
 \begin{tikzpicture}
@@ -171,9 +179,9 @@
 \end{tikzpicture}
 
 
-\begin{tikzpicture}
-  \draw [thick] (-2, 200) rectangle +(250,150) % full tray
-                  +(0,3) rectangle +(249,147);
+\begin{tikzpicture} % tray 2
+  \draw [thick] (-2, 200) rectangle +(250,158) % full tray
+                  +(0,3) rectangle +(249,155);
 
   \draw [thick] (-2, 26) arc [start angle=-90, end angle=90, radius=4];
 
@@ -207,17 +215,18 @@
   \monster{Flame Demon}
   \monster{Earth Demon}
   \monster{Sun Demon}
-  \monster{Wind Demon}
+  \tiltmonster[angle=2]{Wind Demon}
   \monster{Bandit Archer}
   \monster{Bandit Scout}
-  \monsterpair{Living Bones}
+  \tiltmone[angle=-2]{Living Bones}
+  \tiltmtwo[angle=-2]{Living Bones}
   \monster{Cultist}
-  \monster{Living Corpse}
+  \tiltmonster[angle=-1]{Living Corpse}
   \monster{Living Spirit}
   \monster{Night Demon}
-  \monster{Chaos Demon}
-  \monster{Stone Construct}
-  \monster{Cave Bear}
+  \monster[ angle=-90]{Chaos Demon}
+  \monster[ angle=90]{Stone Construct}
+  \monster[ angle=90]{Cave Bear}
   \monster{Savvas Lavaflow}
   \monster{Savvas Icestorm}
   \monster{Harrower Infester}
