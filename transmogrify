@@ -5,11 +5,15 @@ for i
 do
   letter="$(echo "$i" | tr -c -d A-Z)"
   dpi=$(cat dpi$letter.int)
+  dpifloat=$(cat dpi$letter.float)
   ppm=$(cat ppm$letter.int)
 
   paddingmm=2
 
   embiggenmm=0.9  # 0.6mm clearance plus 0.3mm filament overhang
+                  # this looked very small on the test tray
+
+  embiggenmm=1.1
 
   paddingpixels=$(lua -e "print(math.ceil($paddingmm * $ppm / 1000.0))")
 
@@ -33,7 +37,7 @@ do
 #       json="$base.json"
        pnmpad -white -right 75 -bottom 75 -top 75 -left 75 "$i" |
        pnmtoplainpnm |
-       luapbm embiggen -mm "$embiggenmm" |
+       luapbm embiggen -dpi "$dpifloat" -mm "$embiggenmm" |
        pnmcrop > "$target"
        potrace -o "$base.json" -a 0 -t $speckle -b geojson "$target"
        ;;
