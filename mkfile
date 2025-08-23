@@ -55,15 +55,6 @@ ppm%.int:D: ruler150%.jpg # pixels per meter
 	lua5.1 -e "local width = $(identify -format "%w" $prereq)
 	           print(math.floor(1000 * width / 150.0))" > $target
 
-#$B/%-unblue.png: %.jpg unblue
-#	unblue 200 5 $stem.jpg $target
-
-#$B/%A-thresh.pbm:D: $B/%A-blur5.jpg threshold
-#	./threshold 0.79 $B/${stem}A-blur5.jpg > $target
-#
-#$B/%B-thresh.pbm:D: $B/%B-blur5.jpg threshold
-#	./threshold 0.76 $B/${stem}B-blur5.jpg > $target
-
 $B/monsters%-thresh.pbm:D: $B/monsters%-blur5.jpg threshold
 	T=$(eval 'echo $THRESH'"$stem")
 	./threshold "$T" $B/monsters${stem}-blur5.jpg > $target
@@ -73,13 +64,6 @@ $B/%-despeck.pbm:D: $B/%-thresh.pbm despeckle
 	./despeckle 80000 $B/$stem-thresh.pbm |
         unblackedges > $target
 
-#regions-%:V: $B/monsters%-despeck.pbm $B/regions-monsters%.txt
-#	./regions $prereq
-
-
-
-#$B/%.json: $B/%.pbm transmogrify
-#	./transmogrify $B/$stem.pbm
 
 ^$B/(.*([A-Z]).*)'\.'json'$':R: $B/'\1'.pbm transmogrify metrics'\2'
 	./transmogrify $B/$stem1.pbm
