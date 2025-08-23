@@ -64,7 +64,7 @@ $B/monsters%-thresh.pbm:D: $B/monsters%-blur5.jpg threshold
 
 $B/%-despeck.pbm:D: $B/%-thresh.pbm despeckle
 	set -o pipefail
-	./despeckle 80000 $B/$stem-thresh.pbm |
+	./despeckle 160000 $B/$stem-thresh.pbm |
         unblackedges > $target
 
 
