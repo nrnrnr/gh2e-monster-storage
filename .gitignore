@@ -17,3 +17,9 @@ ppm*.int
 /venv/
 /outlines.tex
 /layouts/
+/monsters?.jpg
+/ruler150?.jpg
+/templates/
+/crosslayout/
+/named/*.png
+/named/*.tex

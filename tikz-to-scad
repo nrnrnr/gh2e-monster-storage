@@ -1,0 +1,141 @@
+#!/usr/bin/awk -f
+
+# Extract coordinate definitions from tikz and convert to OpenSCAD modules
+# Input: \path (x, y) coordinate (Name);
+# Output: Name_with_underscores = [x, y]; plus module definitions
+
+BEGIN {
+    # Store all coordinates for module generation
+    coord_count = 0
+}
+
+/\\path \([^)]+\) coordinate \([^)]+\);/ {
+    # Extract coordinates and name using match()
+    if (match($0, /\\path \(([^)]+)\) coordinate \(([^)]+)\);/, parts)) {
+        coords = parts[1]
+        name = parts[2]
+        
+        # Replace spaces with underscores in the name
+        gsub(/ /, "_", name)
+        
+        # Clean up coordinates (remove extra spaces)
+        gsub(/ /, "", coords)
+        
+        # Store coordinate data
+        coord_names[coord_count] = name
+        coord_values[coord_count] = coords
+        coord_count++
+        
+        # Output OpenSCAD variable assignment
+        printf "%s = [%s];\n", name, coords
+    }
+}
+
+# Look for monster usage patterns with optional angle arguments
+/\\monster\[.*angle=.*\]/ {
+    if (match($0, /\\monster\[.*angle=([^}]+)[}\]]/,  angle_parts) && match($0, /\{([^}]+)\}/, name_parts)) {
+        monster_name = name_parts[1]
+        angle_str = angle_parts[1]
+        
+        # Extract numeric angle (remove any non-numeric characters)
+        gsub(/[^-0-9.]/, "", angle_str)
+        
+        # Store angle for this monster
+        gsub(/ /, "_", monster_name)
+        monster_angles[monster_name] = angle_str
+    }
+}
+
+/\\mone\[.*angle=.*\]/ {
+    if (match($0, /\\mone\[.*angle=([^}]+)[}\]]/, angle_parts) && match($0, /\{([^}]+)\}/, name_parts)) {
+        monster_name = name_parts[1] "_1"  # mone implies "_1"
+        angle_str = angle_parts[1]
+        
+        # Extract numeric angle
+        gsub(/[^-0-9.]/, "", angle_str)
+        
+        # Store angle for this monster
+        gsub(/ /, "_", monster_name)
+        monster_angles[monster_name] = angle_str
+    }
+}
+
+/\\mtwo\[.*angle=.*\]/ {
+    if (match($0, /\\mtwo\[.*angle=([^}]+)[}\]]/, angle_parts) && match($0, /\{([^}]+)\}/, name_parts)) {
+        monster_name = name_parts[1] "_2"  # mtwo implies "_2"
+        angle_str = angle_parts[1]
+        
+        # Extract numeric angle
+        gsub(/[^-0-9.]/, "", angle_str)
+        
+        # Store angle for this monster
+        gsub(/ /, "_", monster_name)
+        monster_angles[monster_name] = angle_str
+    }
+}
+
+/\\fullmonster.*angle=/ {
+    if (match($0, /\\fullmonster\{[^}]+\}\{([^}]+)\}\{[^}]+\}\{[^}]*angle=([^}]+)/, parts)) {
+        monster_name = parts[1]
+        angle_str = parts[2]
+        
+        # Extract numeric angle
+        gsub(/[^-0-9.]/, "", angle_str)
+        
+        # Store angle for this monster
+        gsub(/ /, "_", monster_name)
+        monster_angles[monster_name] = angle_str
+    }
+}
+
+END {
+    # Generate modules for each coordinate
+    printf "\n"
+    for (i = 0; i < coord_count; i++) {
+        name = coord_names[i]
+        
+        # Derive base monster name (remove trailing numbers and underscores)
+        monster_base = name
+        gsub(/_[0-9]+$/, "", monster_base)
+        
+        # Get angle for this monster (default to 0)
+        angle = 0
+        if (name in monster_angles) {
+            angle = monster_angles[name]
+        } else if (monster_base in monster_angles) {
+            angle = monster_angles[monster_base]
+        }
+        
+        # Validate angle and determine rotation strategy
+        abs_angle = (angle < 0) ? -angle : angle
+        
+        if (abs_angle <= 15) {
+            # Small rotation: use OpenSCAD rotate
+            if (angle == 0) {
+                printf "module %s() {\n", name
+                printf "  polygon(%s_path(0));\n", name
+                printf "}\n\n"
+            } else {
+                printf "module %s() {\n", name
+                printf "  rotate([0, 0, %g]) polygon(%s_path(0));\n", angle, name
+                printf "}\n\n"
+            }
+        } else if (abs_angle == 90 || abs_angle == 180 || abs_angle == 270 || (abs_angle > 270 && abs_angle <= 360)) {
+            # Large rotation: use path function angle parameter
+            # Normalize angle to standard values
+            norm_angle = angle
+            while (norm_angle > 180) norm_angle -= 360
+            while (norm_angle <= -180) norm_angle += 360
+            
+            printf "module %s() {\n", name
+            printf "  polygon(%s_path(%g));\n", name, norm_angle
+            printf "}\n\n"
+        } else {
+            # Invalid angle range
+            printf "// ERROR: Invalid angle %g for %s (must be <=15 or 90/180/270 degrees)\n", angle, name > "/dev/stderr"
+            printf "module %s() {\n", name
+            printf "  polygon(%s_path(0));\n", name
+            printf "}\n\n"
+        }
+    }
+}
