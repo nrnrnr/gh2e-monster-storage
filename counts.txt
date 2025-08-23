@@ -1,0 +1,36 @@
+ 6 Ancient Artillery
+ 6 Bandit Archer
+ 6 Bandit Scout
+10 Black Imp
+ 4 Cave Bear
+ 6 Chaos Demon
+ 6 City Archer
+ 6 City Guard
+ 6 Crystal Rot
+ 6 Cultist
+10 Deep Terror
+ 6 Earth Demon
+ 6 Flame Demon
+10 Forest Imp
+ 6 Frost Demon
+10 Giant Viper
+ 6 Harrower Infester
+ 6 Hound
+ 6 Inox Archer
+ 6 Inox Guard
+ 6 Inox Priest
+10 Living Bones
+ 6 Living Corpse
+ 6 Living Spirit
+ 6 Lurker Soldier
+ 6 Night Demon
+10 Ooze
+ 6 Rending Drake
+ 4 Savvas Icestorm
+ 4 Savvas Lavaflow
+ 6 Spitting Drake
+ 6 Stone Construct
+ 6 Sun Demon
+ 6 Vermling Priest
+ 6 Vermling Scout
+ 6 Wind Demon

@@ -15,3 +15,5 @@ ppm*.int
 *.pdf
 *.log
 /venv/
+/outlines.tex
+/layouts/
