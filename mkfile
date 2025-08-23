@@ -1,7 +1,7 @@
 MKSHELL=/bin/ksh
 B=build
 
-all:V: 
+all:V: tray.pdf
 
 REGIONSA=A01 A02 A03 A04 A05 A06 A07 A08 A09 A10 A11
 REGIONSB=B01 B02 B03 B04 B05 B06 B07
@@ -32,6 +32,9 @@ THRESHY=0.88
 THRESHZ=0.90
 
 tex:V: outlines.tex
+
+tray.pdf:D: tray.tex outlines.tex
+	latex-batch tray
 
 label-sed:D: labels-to-sed labels.txt
 	./labels-to-sed labels.txt
