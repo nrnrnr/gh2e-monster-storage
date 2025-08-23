@@ -15,7 +15,7 @@ local json = require "dkjson"
 
 -- ----- flags: use your template -----
 local fields = require('flags').parser()
-  :enum('what', {'tikz', 'openscad', 'scad'}, 'tikz')
+  :enum('what', {'tikz', 'openscad as scad'}, 'tikz')
   :help('tikz', 'write tikz')
   :help('openscad', 'write openscad')
   :numarg(1)
