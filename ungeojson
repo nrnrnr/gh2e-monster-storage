@@ -194,39 +194,81 @@ local function emit_tikz(polys, filename, dpi)
   println([[\defpath{%s angle=180}{%s}]], macro, table.concat(pieces_180, " "))
 end
 
-local function emit_openscad(polys)
-  -- OpenSCAD polygon(points=..., paths=...) with 0-based indices
-  local points, paths, idx = {}, {}, 0
+local function emit_openscad(polys, filename, dpi)
+  -- OpenSCAD functions for different rotations with millimeter coordinates
+  local inches_per_dot = 1.0 / dpi
+  local mm_per_inch = 25.4
+  local function mm(dots) return mm_per_inch * inches_per_dot * dots end
+
+  -- Helper function to format points array for a given transformation
+  local function fmt_points_transformed(polys, transform_pt, translate_pt)
+    local points = {}
+    for _,rings in ipairs(polys) do
+      for _,ring in ipairs(rings) do
+        for _,pt in ipairs(ring) do
+          local x, y = transform_pt(pt[1], pt[2])
+          if translate_pt then
+            x, y = translate_pt(x, y)
+          end
+          points[#points+1] = string.format("[%g,%g]", mm(x), mm(y))
+        end
+      end
+    end
+    return "["..table.concat(points, ", ").."]"
+  end
+
+  -- Helper function to find bounding box for translation
+  local function find_bbox_for_transform(polys, transform_pt)
+    local min_x, min_y = math.huge, math.huge
+    for _,rings in ipairs(polys) do
+      for _,ring in ipairs(rings) do
+        for _,pt in ipairs(ring) do
+          local x, y = transform_pt(pt[1], pt[2])
+          min_x, min_y = math.min(min_x, x), math.min(min_y, y)
+        end
+      end
+    end
+    return min_x, min_y
+  end
+
+  -- Calculate points for each rotation
+  local points_0 = fmt_points_transformed(polys, function(x, y) return x, y end)
+  
+  local min_x_90, min_y_90 = find_bbox_for_transform(polys, function(x, y) return -y, x end)
+  local points_90 = fmt_points_transformed(polys, function(x, y) return -y, x end, function(x, y) return x - min_x_90, y - min_y_90 end)
+  
+  local min_x_neg90, min_y_neg90 = find_bbox_for_transform(polys, function(x, y) return y, -x end)
+  local points_neg90 = fmt_points_transformed(polys, function(x, y) return y, -x end, function(x, y) return x - min_x_neg90, y - min_y_neg90 end)
+  
+  local min_x_180, min_y_180 = find_bbox_for_transform(polys, function(x, y) return -x, -y end)
+  local points_180 = fmt_points_transformed(polys, function(x, y) return -x, -y end, function(x, y) return x - min_x_180, y - min_y_180 end)
+
+  -- Calculate original bounding box for metrics
+  local min_x_orig, min_y_orig = math.huge, math.huge
+  local max_x_orig, max_y_orig = -math.huge, -math.huge
   for _,rings in ipairs(polys) do
     for _,ring in ipairs(rings) do
-      local path = {}
       for _,pt in ipairs(ring) do
-        points[#points+1] = pt
-        path[#path+1] = idx  -- 0-based
-        idx = idx + 1
+        local x, y = pt[1], pt[2]
+        min_x_orig, max_x_orig = math.min(min_x_orig, x), math.max(max_x_orig, x)
+        min_y_orig, max_y_orig = math.min(min_y_orig, y), math.max(max_y_orig, y)
       end
-      paths[#paths+1] = path
     end
   end
 
-  local function fmt_points()
-    local buf = {}
-    for _,p in ipairs(points) do
-      buf[#buf+1] = string.format("[%s,%s]", tostring(p[1]), tostring(p[2]))
-    end
-    return "["..table.concat(buf, ", ").."]"
-  end
-  local function fmt_paths()
-    local buf = {}
-    for _,path in ipairs(paths) do
-      local s = {}
-      for i,v in ipairs(path) do s[i] = tostring(v) end
-      buf[#buf+1] = "["..table.concat(s, ",").."]"
-    end
-    return "["..table.concat(buf, ", ").."]"
-  end
+  local macro = filename:gsub('^.*/', ''):gsub('region', ''):gsub('%.json$', '')
+  local width = mm(max_x_orig - min_x_orig)
+  local height = mm(max_y_orig - min_y_orig)
 
-  return string.format("polygon(points=%s, paths=%s);", fmt_points(), fmt_paths())
+  -- Generate OpenSCAD output
+  println('%s_metrics = [%g, %g];', macro, width, height)
+  println('')
+  println('function %s_path(angle=0) = ', macro)
+  println('  angle == 0 || angle == 360 ? %s :', points_0)
+  println('  angle == 90 || angle == -270 ? %s :', points_90)
+  println('  angle == -90 || angle == 270 ? %s :', points_neg90)
+  println('  angle == 180 || angle == -180 ? %s :', points_180)
+  println('  assert(false, str("Invalid angle for %s_path: ", angle));', macro)
 end
 
 -- ----- HOF-style dispatch table -----
@@ -245,6 +287,8 @@ end
 function how.openscad(filename)
   local obj   = read_json(filename)
   local polys = extract_polys(obj)
+  local letter = filename:gsub('%U', '')
+  local dpi = assert(tonumber(assert(io.contents(stringf('dpi%s.float', letter)))))
   emit_openscad(polys, filename, dpi)
 end
 
