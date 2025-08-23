@@ -1,0 +1,83 @@
+A01 Frost Demon
+A02 Flame Demon
+A03 Earth Demon
+A04 Sun Demon
+A05 Wind Demon
+A07 Inox Guard
+A08 Bandit Archer
+A09 Inox Priest
+A10 Vermling Priest
+A11 Inox Archer
+
+B01 Stone Construct
+B02 Cave Bear
+B05 Savvas Icestorm
+B06 Harrower Infester
+B07 Crystal Rot
+
+C01 Giant Viper
+C02 Black Imp
+C03 Lurker Soldier
+C04 Ooze
+C05 Hound
+C07 Rending Drake
+C08 Spitting Drake
+C09 City Guard
+C10 City Archer
+C11 Ancient Artillery
+
+D01 Bandit Scout
+D02 Living Bones
+D03 Cultist
+D04 Living Corpse
+D05 Living Spirit
+D07 Night Demon   
+D08 Chaos Demon   
+D09 Forest Imp    
+D10 Vermling Scout
+D11 Deep Terror
+
+
+W01 Frost Demon
+W02 Flame Demon
+W03 Earth Demon
+W04 Sun Demon
+W05 Wind Demon
+W07 Inox Guard
+W08 Bandit Archer
+W09 Inox Priest
+W10 Vermling Priest
+W11 Inox Archer
+
+X01 Giant Viper
+X02 Black Imp
+X03 Lurker Soldier
+X04 Ooze
+X05 Hound
+X07 Rending Drake
+X08 Spitting Drake
+X09 City Guard
+X10 City Archer
+X11 Ancient Artillery
+
+Y01 Bandit Scout
+Y02 Living Bones
+Y03 Cultist
+Y04 Living Corpse
+Y05 Living Spirit
+Y07 Night Demon   
+Y08 Chaos Demon   
+Y09 Forest Imp    
+Y10 Vermling Scout
+Y11 Deep Terror
+
+Z01 Stone Construct
+Z02 Cave Bear
+Z03 Savvas Lavaflow
+Z05 Savvas Icestorm
+Z06 Harrower Infester
+Z07 Crystal Rot
+
+
+
+
