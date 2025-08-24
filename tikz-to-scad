@@ -7,6 +7,26 @@
 BEGIN {
     # Store all coordinates for module generation
     coord_count = 0
+    
+    # Load counts from counts.txt
+    while ((getline line < "counts.txt") > 0) {
+        if (match(line, /^ *([0-9]+) +(.+)$/, parts)) {
+            count = parts[1]
+            monster = parts[2]
+            counts[monster] = count
+            
+            # Validate count values
+            if (count != 4 && count != 6 && count != 10) {
+                printf "ERROR: Invalid count %s for %s (must be 4, 6, or 10)\n", count, monster > "/dev/stderr"
+                exit 1
+            }
+        }
+    }
+    close("counts.txt")
+    
+    # Track monster usage for validation
+    monster_usage_count = 0
+    current_tray = 0
 }
 
 /\\path \([^)]+\) coordinate \([^)]+\);/ {
@@ -88,22 +108,171 @@ BEGIN {
     }
 }
 
+# Track tray boundaries
+/\\begin\{tikzpicture\}/ {
+    current_tray++
+    in_tikzpicture = 1
+}
+
+/\\end\{tikzpicture\}/ {
+    in_tikzpicture = 0
+}
+
+# Parse monster commands for tray generation (only inside tikzpicture)
+/\\(fullmonster|monster|mone|mtwo|monsterpair|monsterx|tiltmone|tiltmtwo|tiltmonster)/ && in_tikzpicture {
+    record_monster_usage($0, current_tray)
+}
+
+function parse_latex_command(line,    cmd_name, cmd_optional, cmd_args, cmd_args_count) {
+    # Parse LaTeX command with optional and required arguments
+    # Uses global variables: parsed_cmd_name, parsed_cmd_optional, parsed_cmd_args[], parsed_cmd_args_count
+    
+    parsed_cmd_name = ""
+    parsed_cmd_optional = ""
+    parsed_cmd_args_count = 0
+    delete parsed_cmd_args
+    
+    # Find command name (starts with backslash)
+    if (!match(line, /\\([a-zA-Z]+)/, name_parts)) {
+        return 0
+    }
+    parsed_cmd_name = name_parts[1]
+    
+    # Start parsing after command name
+    text = substr(line, RSTART + RLENGTH)
+    
+    # Parse optional argument [...] - preserve spaces within brackets
+    if (match(text, /^[ \t]*\[([^\]]*)\]/, opt_parts)) {
+        parsed_cmd_optional = opt_parts[1]  # Keep original spacing
+        text = substr(text, RLENGTH + 1)
+    }
+    
+    # Parse required arguments {...}
+    while (match(text, /^[ \t]*\{([^}]*)\}/, arg_parts)) {
+        parsed_cmd_args[++parsed_cmd_args_count] = arg_parts[1]
+        text = substr(text, RLENGTH + 1)
+    }
+    
+    return 1
+}
+
+function record_monster_usage(line, tray_num) {
+    # Parse LaTeX command structure
+    if (!parse_latex_command(line)) return
+    
+    if (parsed_cmd_name == "") return
+    
+    monster_base = ""
+    angle = 0
+    command_type = ""
+    coord_name = ""
+    
+    # Extract angle from optional arguments or from any argument containing "angle="
+    if (parsed_cmd_optional != "" && match(parsed_cmd_optional, /angle=([^,}]+)/, angle_parts)) {
+        gsub(/[^-0-9.]/, "", angle_parts[1])
+        angle = angle_parts[1]
+    } else {
+        # Check all arguments for angle= pattern
+        for (i = 1; i <= parsed_cmd_args_count; i++) {
+            if (match(parsed_cmd_args[i], /angle=([^,}]+)/, angle_parts)) {
+                gsub(/[^-0-9.]/, "", angle_parts[1])
+                angle = angle_parts[1]
+                break
+            }
+        }
+    }
+    
+    # Handle different command types
+    if (parsed_cmd_name == "fullmonster" && parsed_cmd_args_count >= 2) {
+        coord_name = parsed_cmd_args[1]
+        monster_base = parsed_cmd_args[2]
+        
+        # Check if this is a count 10 monster with numbered instances
+        monster_lookup = monster_base
+        gsub(/_/, " ", monster_lookup)
+        expected_count = counts[monster_lookup]
+        
+        if (expected_count == 10 && match(coord_name, /(.+) 1$/, name_parts)) {
+            command_type = "mone"
+            monster_base = name_parts[1]
+        } else if (expected_count == 10 && match(coord_name, /(.+) 2$/, name_parts)) {
+            command_type = "mtwo"
+            monster_base = name_parts[1]
+        } else {
+            command_type = "single"
+        }
+        
+    } else if (parsed_cmd_name == "xfullmonster" && parsed_cmd_args_count >= 2) {
+        coord_name = parsed_cmd_args[1]
+        monster_base = parsed_cmd_args[2]
+        command_type = "single"
+        
+    } else if ((parsed_cmd_name == "monster" || parsed_cmd_name == "monsterx" || parsed_cmd_name == "tiltmonster") && parsed_cmd_args_count >= 1) {
+        monster_base = parsed_cmd_args[1]
+        coord_name = monster_base
+        command_type = "single"
+        
+    } else if ((parsed_cmd_name == "mone" || parsed_cmd_name == "tiltmone") && parsed_cmd_args_count >= 1) {
+        monster_base = parsed_cmd_args[1]
+        coord_name = monster_base "_1"
+        command_type = "mone"
+        
+    } else if ((parsed_cmd_name == "mtwo" || parsed_cmd_name == "tiltmtwo") && parsed_cmd_args_count >= 1) {
+        monster_base = parsed_cmd_args[1]
+        coord_name = monster_base "_2"
+        command_type = "mtwo"
+        
+    } else if (parsed_cmd_name == "monsterpair" && parsed_cmd_args_count >= 1) {
+        monster_base = parsed_cmd_args[1]
+        command_type = "pair"
+    }
+    
+    if (monster_base != "") {
+        # Normalize names (replace spaces with underscores)
+        gsub(/ /, "_", coord_name)
+        gsub(/ /, "_", monster_base)
+        
+        # Store monster usage
+        usage_key = monster_usage_count++
+        monster_usages[usage_key]["monster"] = monster_base
+        monster_usages[usage_key]["coord"] = coord_name
+        monster_usages[usage_key]["type"] = command_type
+        monster_usages[usage_key]["tray"] = tray_num
+        monster_usages[usage_key]["line"] = line
+        monster_usages[usage_key]["angle"] = angle
+    }
+}
+
 END {
-    # Generate modules for each coordinate
+    # Generate modules for each coordinate, using monster usage data for proper path names
     printf "\n"
+    
+    # Create a mapping from coordinate names to monster base names
+    delete coord_to_monster
+    for (i = 0; i < monster_usage_count; i++) {
+        coord = monster_usages[i]["coord"]
+        monster = monster_usages[i]["monster"] 
+        angle = monster_usages[i]["angle"]
+        
+        if (coord != "") {
+            coord_to_monster[coord]["monster"] = monster
+            coord_to_monster[coord]["angle"] = angle
+        }
+    }
+    
+    # Generate modules for each coordinate
     for (i = 0; i < coord_count; i++) {
         name = coord_names[i]
         
-        # Derive base monster name (remove trailing numbers and underscores)
-        monster_base = name
-        gsub(/_[0-9]+$/, "", monster_base)
-        
-        # Get angle for this monster (default to 0)
-        angle = 0
-        if (name in monster_angles) {
-            angle = monster_angles[name]
-        } else if (monster_base in monster_angles) {
-            angle = monster_angles[monster_base]
+        # Get the monster base name and angle from usage data
+        if (name in coord_to_monster) {
+            monster_base = coord_to_monster[name]["monster"]
+            angle = coord_to_monster[name]["angle"]
+        } else {
+            # Fallback: derive base monster name (remove trailing numbers)
+            monster_base = name
+            gsub(/_[0-9]+$/, "", monster_base)
+            angle = 0
         }
         
         # Validate angle and determine rotation strategy
@@ -113,11 +282,11 @@ END {
             # Small rotation: use OpenSCAD rotate
             if (angle == 0) {
                 printf "module %s() {\n", name
-                printf "  polygon(%s_path(0));\n", name
+                printf "  polygon(%s_path(0));\n", monster_base
                 printf "}\n\n"
             } else {
                 printf "module %s() {\n", name
-                printf "  rotate([0, 0, %g]) polygon(%s_path(0));\n", angle, name
+                printf "  rotate([0, 0, %g]) polygon(%s_path(0));\n", angle, monster_base
                 printf "}\n\n"
             }
         } else if (abs_angle == 90 || abs_angle == 180 || abs_angle == 270 || (abs_angle > 270 && abs_angle <= 360)) {
@@ -128,14 +297,117 @@ END {
             while (norm_angle <= -180) norm_angle += 360
             
             printf "module %s() {\n", name
-            printf "  polygon(%s_path(%g));\n", name, norm_angle
+            printf "  polygon(%s_path(%g));\n", monster_base, norm_angle
             printf "}\n\n"
         } else {
             # Invalid angle range
             printf "// ERROR: Invalid angle %g for %s (must be <=15 or 90/180/270 degrees)\n", angle, name > "/dev/stderr"
             printf "module %s() {\n", name
-            printf "  polygon(%s_path(0));\n", name
+            printf "  polygon(%s_path(0));\n", monster_base
             printf "}\n\n"
         }
     }
+    
+    # Validate monster usage and generate trays
+    validate_and_generate_trays()
+}
+
+function validate_and_generate_trays() {
+    # Group usages by monster for validation
+    for (i = 0; i < monster_usage_count; i++) {
+        monster = monster_usages[i]["monster"]
+        type = monster_usages[i]["type"]
+        
+        monster_types[monster][type]++
+        monster_total[monster]++
+    }
+    
+    # Validate each monster against counts.txt
+    for (monster in monster_total) {
+        # Convert underscores back to spaces for counts lookup
+        monster_lookup = monster
+        gsub(/_/, " ", monster_lookup)
+        expected_count = counts[monster_lookup]
+        if (expected_count == "") {
+            printf "ERROR: Monster '%s' not found in counts.txt\n", monster_lookup > "/dev/stderr"
+            exit 1
+        }
+        
+        has_pair = ("pair" in monster_types[monster]) && monster_types[monster]["pair"] > 0
+        has_mone = ("mone" in monster_types[monster]) && monster_types[monster]["mone"] > 0  
+        has_mtwo = ("mtwo" in monster_types[monster]) && monster_types[monster]["mtwo"] > 0
+        has_single = ("single" in monster_types[monster]) && monster_types[monster]["single"] > 0
+        
+        if (expected_count == 10) {
+            # Count 10 monsters should have either monsterpair OR mone+mtwo
+            if (has_pair && (has_mone || has_mtwo || has_single)) {
+                printf "ERROR: Monster '%s' (count 10) has monsterpair AND individual commands\n", monster > "/dev/stderr"
+                exit 1
+            }
+            if (!has_pair && !(has_mone && has_mtwo)) {
+                printf "ERROR: Monster '%s' (count 10) should have monsterpair OR mone+mtwo\n", monster > "/dev/stderr"
+                exit 1
+            }
+            if (!has_pair && has_single) {
+                printf "ERROR: Monster '%s' (count 10) has single commands but should use mone+mtwo\n", monster > "/dev/stderr"
+                exit 1
+            }
+        } else {
+            # Count 4/6 monsters should NOT have pairs or mone/mtwo
+            if (has_pair) {
+                printf "ERROR: Monster '%s' (count %s) should not have monsterpair\n", monster, expected_count > "/dev/stderr"
+                exit 1
+            }
+            if (has_mone || has_mtwo) {
+                printf "ERROR: Monster '%s' (count %s) should not have mone/mtwo\n", monster, expected_count > "/dev/stderr"
+                exit 1
+            }
+        }
+    }
+    
+    # Generate tray modules
+    printf "\n// Tray modules\n"
+    generate_tray_module(1)
+    generate_tray_module(2)
+}
+
+function generate_tray_module(tray_num) {
+    printf "module tray%d() {\n", tray_num
+    
+    # Generate wells for this tray
+    for (i = 0; i < monster_usage_count; i++) {
+        if (monster_usages[i]["tray"] != tray_num) continue
+        
+        monster = monster_usages[i]["monster"]
+        coord = monster_usages[i]["coord"]
+        type = monster_usages[i]["type"]
+        angle = monster_usages[i]["angle"]
+        
+        monster_lookup = monster
+        gsub(/_/, " ", monster_lookup)
+        expected_count = counts[monster_lookup]
+        well_count = expected_count
+        
+        if (expected_count == 10) {
+            well_count = 5  # Split into wells of 5 each
+        }
+        
+        if (type == "pair") {
+            # Generate two wells for monsterpair
+            printf "  translate([%s.x, %s.y, 0]) well(%d) ", monster "_1", monster "_1", well_count
+            if (angle != 0) printf "rotate([0,0,%g]) ", angle
+            printf "%s();\n", monster "_1"
+            
+            printf "  translate([%s.x, %s.y, 0]) well(%d) ", monster "_2", monster "_2", well_count  
+            if (angle != 0) printf "rotate([0,0,%g]) ", angle
+            printf "%s();\n", monster "_2"
+        } else {
+            # Generate single well
+            printf "  translate([%s.x, %s.y, 0]) well(%d) ", coord, coord, well_count
+            if (angle != 0) printf "rotate([0,0,%g]) ", angle
+            printf "%s();\n", coord
+        }
+    }
+    
+    printf "}\n\n"
 }
