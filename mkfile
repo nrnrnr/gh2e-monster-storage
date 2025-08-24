@@ -20,6 +20,7 @@ TEX=${REGIONSW:%=$B/region%.tex} \
     ${REGIONSY:%=$B/region%.tex} \
     ${REGIONSZ:%=$B/region%.tex} \
 
+SCAD=${TEX:%.tex=%.scad}
 
 THRESHA=0.79
 THRESHB=0.76
@@ -33,6 +34,8 @@ THRESHZ=0.90
 
 tex:V: outlines.tex
 
+scad:V: $SCAD
+
 tray.pdf:D: tray.tex outlines.tex
 	latex-batch tray
 
@@ -43,6 +46,16 @@ outlines.tex:D: $TEX label-sed link-named-regions
 	./link-named-regions labels.txt
 	set -o pipefail
         cat named/*.tex | ./label-sed > $target
+
+outlines.scad:D: $SCAD label-sed
+	set -o pipefail
+        cat named/*.scad | ./label-sed > $target
+
+outlines.scad:D: $SCAD 
+        cat named/*.scad > $target
+
+tray.scad:D: tray.tex tikz-to-scad
+	tikz-to-scad tray.tex > $target
 
 metrics%:V: $B/dpi%.float $B/dpi%.int $B/ppm%.int
 
