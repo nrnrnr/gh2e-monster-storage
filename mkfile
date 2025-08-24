@@ -44,17 +44,17 @@ outlines.tex:D: $TEX label-sed link-named-regions
 	set -o pipefail
         cat named/*.tex | ./label-sed > $target
 
-metrics%:V: dpi%.float dpi%.int ppm%.int
+metrics%:V: $B/dpi%.float $B/dpi%.int $B/ppm%.int
 
-dpi%.float:D: ruler150%.jpg
+$B/dpi%.float:D: ruler150%.jpg
 	lua5.1 -e "local width = $(identify -format "%w" $prereq)
 	           print(width / (150.0 / 25.4))" > $target
 
-dpi%.int:D: dpi%.float
+$B/dpi%.int:D: dpi%.float
 	lua5.1 -e "local width = $(cat $prereq)
 	           print(math.floor(width + 0.5))" > $target
 
-ppm%.int:D: ruler150%.jpg # pixels per meter
+$B/ppm%.int:D: ruler150%.jpg # pixels per meter
 	lua5.1 -e "local width = $(identify -format "%w" $prereq)
 	           print(math.floor(1000 * width / 150.0))" > $target
 

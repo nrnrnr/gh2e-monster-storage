@@ -4,9 +4,9 @@
 for i
 do
   letter="$(echo "$i" | tr -c -d A-Z)"
-  dpi=$(cat dpi$letter.int)
-  dpifloat=$(cat dpi$letter.float)
-  ppm=$(cat ppm$letter.int)
+  dpi=$(cat build/dpi$letter.int)
+  dpifloat=$(cat build/dpi$letter.float)
+  ppm=$(cat build/ppm$letter.int)
 
   paddingmm=2
 
