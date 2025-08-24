@@ -81,6 +81,7 @@ do
     pnminvert "$outbase.pbm" > "$mask"
     djpeg "$jpg" |   # bogus, need dimension before embiggening?
     pnmcut -left $left -right $right -top $top -bottom $bottom |
+    pnmgamma 0.7 |
     pnmtopng -size="$ppm $ppm 1" -alpha="$mask" |
     downsample_png 4 > "$outbase.png"
     
