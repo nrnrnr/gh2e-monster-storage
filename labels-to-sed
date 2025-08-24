@@ -59,6 +59,12 @@ while read line; do
     # Add sed expression for LaTeX arguments "{XXX" (without closing brace)
     print "    -e 's/{$region_id /{$escaped_name /' \\" >> "$output_script"
     
+    # Add sed expressions for OpenSCAD definitions
+    # Convert spaces to underscores for OpenSCAD identifiers
+    scad_name=$(echo "$escaped_name" | sed 's/ /_/g')
+    print "    -e 's/${region_id}_metrics/${scad_name}_metrics/g' \\" >> "$output_script"
+    print "    -e 's/${region_id}_path/${scad_name}_path/g' \\" >> "$output_script"
+    
 done < "$labels_file"
 
 # Remove the trailing backslash from the last line

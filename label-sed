@@ -3,108 +3,180 @@
 sed    -e 's/region W01/Frost Demon/' \
     -e 's/{W01}/{Frost Demon}/' \
     -e 's/{W01 /{Frost Demon /' \
+    -e 's/W01_metrics/Frost_Demon_metrics/g' \
+    -e 's/W01_path/Frost_Demon_path/g' \
     -e 's/region W02/Flame Demon/' \
     -e 's/{W02}/{Flame Demon}/' \
     -e 's/{W02 /{Flame Demon /' \
+    -e 's/W02_metrics/Flame_Demon_metrics/g' \
+    -e 's/W02_path/Flame_Demon_path/g' \
     -e 's/region W03/Earth Demon/' \
     -e 's/{W03}/{Earth Demon}/' \
     -e 's/{W03 /{Earth Demon /' \
+    -e 's/W03_metrics/Earth_Demon_metrics/g' \
+    -e 's/W03_path/Earth_Demon_path/g' \
     -e 's/region W04/Sun Demon/' \
     -e 's/{W04}/{Sun Demon}/' \
     -e 's/{W04 /{Sun Demon /' \
+    -e 's/W04_metrics/Sun_Demon_metrics/g' \
+    -e 's/W04_path/Sun_Demon_path/g' \
     -e 's/region W05/Wind Demon/' \
     -e 's/{W05}/{Wind Demon}/' \
     -e 's/{W05 /{Wind Demon /' \
+    -e 's/W05_metrics/Wind_Demon_metrics/g' \
+    -e 's/W05_path/Wind_Demon_path/g' \
     -e 's/region W07/Inox Guard/' \
     -e 's/{W07}/{Inox Guard}/' \
     -e 's/{W07 /{Inox Guard /' \
+    -e 's/W07_metrics/Inox_Guard_metrics/g' \
+    -e 's/W07_path/Inox_Guard_path/g' \
     -e 's/region W08/Bandit Archer/' \
     -e 's/{W08}/{Bandit Archer}/' \
     -e 's/{W08 /{Bandit Archer /' \
+    -e 's/W08_metrics/Bandit_Archer_metrics/g' \
+    -e 's/W08_path/Bandit_Archer_path/g' \
     -e 's/region W09/Inox Priest/' \
     -e 's/{W09}/{Inox Priest}/' \
     -e 's/{W09 /{Inox Priest /' \
+    -e 's/W09_metrics/Inox_Priest_metrics/g' \
+    -e 's/W09_path/Inox_Priest_path/g' \
     -e 's/region W10/Vermling Priest/' \
     -e 's/{W10}/{Vermling Priest}/' \
     -e 's/{W10 /{Vermling Priest /' \
+    -e 's/W10_metrics/Vermling_Priest_metrics/g' \
+    -e 's/W10_path/Vermling_Priest_path/g' \
     -e 's/region W11/Inox Archer/' \
     -e 's/{W11}/{Inox Archer}/' \
     -e 's/{W11 /{Inox Archer /' \
+    -e 's/W11_metrics/Inox_Archer_metrics/g' \
+    -e 's/W11_path/Inox_Archer_path/g' \
     -e 's/region X01/Giant Viper/' \
     -e 's/{X01}/{Giant Viper}/' \
     -e 's/{X01 /{Giant Viper /' \
+    -e 's/X01_metrics/Giant_Viper_metrics/g' \
+    -e 's/X01_path/Giant_Viper_path/g' \
     -e 's/region X02/Black Imp/' \
     -e 's/{X02}/{Black Imp}/' \
     -e 's/{X02 /{Black Imp /' \
+    -e 's/X02_metrics/Black_Imp_metrics/g' \
+    -e 's/X02_path/Black_Imp_path/g' \
     -e 's/region X03/Lurker Soldier/' \
     -e 's/{X03}/{Lurker Soldier}/' \
     -e 's/{X03 /{Lurker Soldier /' \
+    -e 's/X03_metrics/Lurker_Soldier_metrics/g' \
+    -e 's/X03_path/Lurker_Soldier_path/g' \
     -e 's/region X04/Ooze/' \
     -e 's/{X04}/{Ooze}/' \
     -e 's/{X04 /{Ooze /' \
+    -e 's/X04_metrics/Ooze_metrics/g' \
+    -e 's/X04_path/Ooze_path/g' \
     -e 's/region X05/Hound/' \
     -e 's/{X05}/{Hound}/' \
     -e 's/{X05 /{Hound /' \
+    -e 's/X05_metrics/Hound_metrics/g' \
+    -e 's/X05_path/Hound_path/g' \
     -e 's/region X07/Rending Drake/' \
     -e 's/{X07}/{Rending Drake}/' \
     -e 's/{X07 /{Rending Drake /' \
+    -e 's/X07_metrics/Rending_Drake_metrics/g' \
+    -e 's/X07_path/Rending_Drake_path/g' \
     -e 's/region X08/Spitting Drake/' \
     -e 's/{X08}/{Spitting Drake}/' \
     -e 's/{X08 /{Spitting Drake /' \
+    -e 's/X08_metrics/Spitting_Drake_metrics/g' \
+    -e 's/X08_path/Spitting_Drake_path/g' \
     -e 's/region X09/City Guard/' \
     -e 's/{X09}/{City Guard}/' \
     -e 's/{X09 /{City Guard /' \
+    -e 's/X09_metrics/City_Guard_metrics/g' \
+    -e 's/X09_path/City_Guard_path/g' \
     -e 's/region X10/City Archer/' \
     -e 's/{X10}/{City Archer}/' \
     -e 's/{X10 /{City Archer /' \
+    -e 's/X10_metrics/City_Archer_metrics/g' \
+    -e 's/X10_path/City_Archer_path/g' \
     -e 's/region X11/Ancient Artillery/' \
     -e 's/{X11}/{Ancient Artillery}/' \
     -e 's/{X11 /{Ancient Artillery /' \
+    -e 's/X11_metrics/Ancient_Artillery_metrics/g' \
+    -e 's/X11_path/Ancient_Artillery_path/g' \
     -e 's/region Y01/Bandit Scout/' \
     -e 's/{Y01}/{Bandit Scout}/' \
     -e 's/{Y01 /{Bandit Scout /' \
+    -e 's/Y01_metrics/Bandit_Scout_metrics/g' \
+    -e 's/Y01_path/Bandit_Scout_path/g' \
     -e 's/region Y02/Living Bones/' \
     -e 's/{Y02}/{Living Bones}/' \
     -e 's/{Y02 /{Living Bones /' \
+    -e 's/Y02_metrics/Living_Bones_metrics/g' \
+    -e 's/Y02_path/Living_Bones_path/g' \
     -e 's/region Y03/Cultist/' \
     -e 's/{Y03}/{Cultist}/' \
     -e 's/{Y03 /{Cultist /' \
+    -e 's/Y03_metrics/Cultist_metrics/g' \
+    -e 's/Y03_path/Cultist_path/g' \
     -e 's/region Y04/Living Corpse/' \
     -e 's/{Y04}/{Living Corpse}/' \
     -e 's/{Y04 /{Living Corpse /' \
+    -e 's/Y04_metrics/Living_Corpse_metrics/g' \
+    -e 's/Y04_path/Living_Corpse_path/g' \
     -e 's/region Y05/Living Spirit/' \
     -e 's/{Y05}/{Living Spirit}/' \
     -e 's/{Y05 /{Living Spirit /' \
+    -e 's/Y05_metrics/Living_Spirit_metrics/g' \
+    -e 's/Y05_path/Living_Spirit_path/g' \
     -e 's/region Y07/Night Demon/' \
     -e 's/{Y07}/{Night Demon}/' \
     -e 's/{Y07 /{Night Demon /' \
+    -e 's/Y07_metrics/Night_Demon_metrics/g' \
+    -e 's/Y07_path/Night_Demon_path/g' \
     -e 's/region Y08/Chaos Demon/' \
     -e 's/{Y08}/{Chaos Demon}/' \
     -e 's/{Y08 /{Chaos Demon /' \
+    -e 's/Y08_metrics/Chaos_Demon_metrics/g' \
+    -e 's/Y08_path/Chaos_Demon_path/g' \
     -e 's/region Y09/Forest Imp/' \
     -e 's/{Y09}/{Forest Imp}/' \
     -e 's/{Y09 /{Forest Imp /' \
+    -e 's/Y09_metrics/Forest_Imp_metrics/g' \
+    -e 's/Y09_path/Forest_Imp_path/g' \
     -e 's/region Y10/Vermling Scout/' \
     -e 's/{Y10}/{Vermling Scout}/' \
     -e 's/{Y10 /{Vermling Scout /' \
+    -e 's/Y10_metrics/Vermling_Scout_metrics/g' \
+    -e 's/Y10_path/Vermling_Scout_path/g' \
     -e 's/region Y11/Deep Terror/' \
     -e 's/{Y11}/{Deep Terror}/' \
     -e 's/{Y11 /{Deep Terror /' \
+    -e 's/Y11_metrics/Deep_Terror_metrics/g' \
+    -e 's/Y11_path/Deep_Terror_path/g' \
     -e 's/region Z01/Stone Construct/' \
     -e 's/{Z01}/{Stone Construct}/' \
     -e 's/{Z01 /{Stone Construct /' \
+    -e 's/Z01_metrics/Stone_Construct_metrics/g' \
+    -e 's/Z01_path/Stone_Construct_path/g' \
     -e 's/region Z02/Cave Bear/' \
     -e 's/{Z02}/{Cave Bear}/' \
     -e 's/{Z02 /{Cave Bear /' \
+    -e 's/Z02_metrics/Cave_Bear_metrics/g' \
+    -e 's/Z02_path/Cave_Bear_path/g' \
     -e 's/region Z03/Savvas Lavaflow/' \
     -e 's/{Z03}/{Savvas Lavaflow}/' \
     -e 's/{Z03 /{Savvas Lavaflow /' \
+    -e 's/Z03_metrics/Savvas_Lavaflow_metrics/g' \
+    -e 's/Z03_path/Savvas_Lavaflow_path/g' \
     -e 's/region Z05/Savvas Icestorm/' \
     -e 's/{Z05}/{Savvas Icestorm}/' \
     -e 's/{Z05 /{Savvas Icestorm /' \
+    -e 's/Z05_metrics/Savvas_Icestorm_metrics/g' \
+    -e 's/Z05_path/Savvas_Icestorm_path/g' \
     -e 's/region Z06/Harrower Infester/' \
     -e 's/{Z06}/{Harrower Infester}/' \
     -e 's/{Z06 /{Harrower Infester /' \
+    -e 's/Z06_metrics/Harrower_Infester_metrics/g' \
+    -e 's/Z06_path/Harrower_Infester_path/g' \
     -e 's/region Z07/Crystal Rot/' \
     -e 's/{Z07}/{Crystal Rot}/' \
-    -e 's/{Z07 /{Crystal Rot /'
+    -e 's/{Z07 /{Crystal Rot /' \
+    -e 's/Z07_metrics/Crystal_Rot_metrics/g' \
+    -e 's/Z07_path/Crystal_Rot_path/g'
