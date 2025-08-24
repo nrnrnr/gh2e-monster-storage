@@ -39,6 +39,9 @@ scad:V: $SCAD
 tray.pdf:D: tray.tex outlines.tex
 	latex-batch tray
 
+%.stl:D: %.scad well.scad outlines.scad tray.scad
+	openscad-fast -o $target $stem.scad
+
 label-sed:D: labels-to-sed labels.txt
 	./labels-to-sed labels.txt
 
@@ -49,10 +52,7 @@ outlines.tex:D: $TEX label-sed link-named-regions
 
 outlines.scad:D: $SCAD label-sed
 	set -o pipefail
-        cat named/*.scad | ./label-sed > $target
-
-outlines.scad:D: $SCAD 
-        cat named/*.scad > $target
+        cat build/*.scad | ./label-sed > $target
 
 tray.scad:D: tray.tex tikz-to-scad
 	tikz-to-scad tray.tex > $target

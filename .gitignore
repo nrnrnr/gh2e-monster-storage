@@ -24,3 +24,5 @@ ppm*.int
 /named/*.png
 /named/*.tex
 /tray.scad
+*.stl
+/outlines.scad

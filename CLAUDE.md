@@ -31,3 +31,21 @@ The start of a pipeline is a photograph, which has a base name (for now, `monste
 
 - all things built by scripts, like a numbered jpg, go in the build directory.
 - Never modify monstersA.jpg, or any similar file with a different letter.
+
+
+
+
+Translation of tikz to scad
+---------------------------
+
+Each tikz picture will correspond to a module; call them tray1 and tray2.
+Each element of a picture will be rendered using the `well` module as 
+shown in the command in well.scad.  The argument to `well` will be taken 
+from file `counts.txt`; any monster with a count of 10 should have two 
+instances, each of which to get a well of size 5.  A monster should have 
+two instances if and only if it has a count of 10; if you see an 
+inconsistency, the translation should halt with an error message.
+Each of the following commands in tray.tex should translate to a single 
+well: \fullmonster, \mone, \mtwo, \monster, \xfullmonster, \monsterx, and
+ anything similar beginning with "tilt."  Each \monsterpair command 
+should be translated into two wells.
