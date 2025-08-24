@@ -88,7 +88,7 @@ $B/%.tex:D: $B/%.json ungeojson
 	ungeojson -tikz $B/$stem.json > $target
 
 $B/%.scad:D: $B/%.json ungeojson
-	ungeojson -scae $B/$stem.json > $target
+	ungeojson -scad $B/$stem.json > $target
 
 blur-%:V: $B/monsters%-blur5.jpg
 
