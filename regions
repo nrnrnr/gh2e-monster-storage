@@ -63,9 +63,11 @@ base="$(suffex "$original")"
 jpg="${base%-*}"
 jpg="${jpg#*/}.jpg"
 
-[[ -r ppm$letter.int ]] || { echo "$0: no ppm$letter.int" >&2 ; exit 1 ; }
+B=build
 
-ppm=$(cat ppm$letter.int)
+[[ -r $B/ppm$letter.int ]] || { echo "$0: no $B/ppm$letter.int" >&2 ; exit 1 ; }
+
+ppm=$(cat $B/ppm$letter.int)
 
 while read commands
 do

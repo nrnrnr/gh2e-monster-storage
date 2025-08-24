@@ -280,7 +280,7 @@ function how.tikz(filename)
   local obj   = read_json(filename)
   local polys = extract_polys(obj)
   local letter = filename:gsub('%U', '')
-  local dpi = assert(tonumber(assert(io.contents(stringf('dpi%s.float', letter)))))
+  local dpi = assert(tonumber(assert(io.contents(stringf('build/dpi%s.float', letter)))))
   emit_tikz(polys, filename, dpi)
 end
 
@@ -288,7 +288,7 @@ function how.openscad(filename)
   local obj   = read_json(filename)
   local polys = extract_polys(obj)
   local letter = filename:gsub('%U', '')
-  local dpi = assert(tonumber(assert(io.contents(stringf('dpi%s.float', letter)))))
+  local dpi = assert(tonumber(assert(io.contents(stringf('build/dpi%s.float', letter)))))
   emit_openscad(polys, filename, dpi)
 end
 
