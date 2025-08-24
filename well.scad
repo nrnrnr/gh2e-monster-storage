@@ -14,4 +14,12 @@ module well (n=count) { // store n standees
     children();
 }
 
+
+//  Usage:
+//  
+//  translate([Inox_Guard.x, Inox_Guard.y, 0]) // place in tray
+//    well(6) // convert to 3D shape of appropriate Z and height
+//      rotate([0,0,small_angle]) // omit if small angle is zero
+//         Inox_Guard(); // outline of the shape
+    
   
