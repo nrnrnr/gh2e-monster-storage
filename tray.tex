@@ -180,11 +180,12 @@
 
 
 \begin{tikzpicture} % tray 2
-  \draw [thick] (-2, 200) rectangle +(250,158) % full tray
+  \draw [thick] (1, 200) rectangle +(250,158) % full tray
                   +(0,3) rectangle +(249,155);
 
   \draw [thick] (-2, 26) arc [start angle=-90, end angle=90, radius=4];
 
+  % top row
   \path (  3, 297) coordinate (Living Corpse);
   \path ( 35, 297) coordinate (Cultist);
   \path ( 68, 297) coordinate (Bandit Archer);
@@ -193,14 +194,18 @@
   \path (138, 302) coordinate (Crystal Rot);
   \path (168, 301) coordinate (Cave Bear);
   \path (217, 295) coordinate (Harrower Infester);
+  % end top row
 
+  % middle row
   \path (  8, 255) coordinate (Living Bones 1);
   \path ( 36, 255) coordinate (Living Bones 2);
   \path ( 70, 255) coordinate (Living Spirit);
   \path (104, 263) coordinate (Chaos Demon);
   \path (154, 253) coordinate (Frost Demon);
   \path (191, 250) coordinate (Stone Construct);
+  % end middle row
 
+  % bottom row
   \path (  3, 205) coordinate (Wind Demon);
   \path ( 36, 205) coordinate (Night Demon);
   \path ( 72, 205) coordinate (Flame Demon);
@@ -209,6 +214,7 @@
 
   \path (184, 205) coordinate (Savvas Lavaflow);
   \path (218, 205) coordinate (Savvas Icestorm);
+  % bottom row
 
 
   \monster{Frost Demon}
