@@ -45,9 +45,6 @@ BEGIN {
         coord_names[coord_count] = name
         coord_values[coord_count] = coords
         coord_count++
-        
-        # Output OpenSCAD variable assignment
-        printf "%s = [%s];\n", name, coords
     }
 }
 
@@ -116,6 +113,23 @@ BEGIN {
 
 /\\end\{tikzpicture\}/ {
     in_tikzpicture = 0
+}
+
+# Parse tray rectangle dimensions
+/\\draw.*rectangle.*\+\(.*,.*\).*% full tray/ && in_tikzpicture {
+    if (match($0, /\\draw[^(]*\(([^)]+)\)[^+]*\+\(([^)]+)\)/, rect_parts)) {
+        # Extract start coordinates and dimensions
+        start_coords = rect_parts[1]
+        dimensions = rect_parts[2]
+        
+        # Clean up coordinates (remove spaces)
+        gsub(/[ \t]/, "", start_coords)
+        gsub(/[ \t]/, "", dimensions)
+        
+        # Store tray rectangle info
+        tray_rectangles[current_tray]["start"] = start_coords
+        tray_rectangles[current_tray]["dimensions"] = dimensions
+    }
 }
 
 # Parse monster commands for tray generation (only inside tikzpicture)
@@ -260,6 +274,24 @@ function record_monster_usage(line, tray_num) {
 }
 
 END {
+    # Output coordinate definitions first
+    for (i = 0; i < coord_count; i++) {
+        name = coord_names[i]
+        coords = coord_values[i]
+        gsub(/ /, "_", name)
+        printf "%s = [%s];\n", name, coords
+    }
+    
+    printf "\n"
+    
+    # Now output tray rectangle information
+    for (tray_num = 1; tray_num <= 2; tray_num++) {
+        if (tray_num in tray_rectangles) {
+            printf "tray%d_ll = [%s];\n", tray_num, tray_rectangles[tray_num]["start"]
+            printf "tray%d_dimens = [%s];\n", tray_num, tray_rectangles[tray_num]["dimensions"]
+        }
+    }
+    
     # Generate modules for each coordinate, using monster usage data for proper path names
     printf "\n"
     

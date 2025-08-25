@@ -34,7 +34,7 @@ THRESHZ=0.90
 
 tex:V: outlines.tex
 
-scad:V: $SCAD
+scad:V: $SCAD tray.scad outlines.scad
 
 tray.pdf:D: tray.tex outlines.tex
 	latex-batch tray
