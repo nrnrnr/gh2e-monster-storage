@@ -188,17 +188,18 @@
   % top row
   \path (  2, 309) coordinate (Living Bones 1);
   \path ( 33.5, 309) coordinate (Living Bones 2);
-  \path ( 66, 309) coordinate (Living Spirit);
-  \path (98, 303) coordinate (Bandit Scout);
+  \path (65.5, 309) coordinate (Living Spirit);
+  \path (96, 303.5) coordinate (Crystal Rot);
 
-  \path (138, 302) coordinate (Crystal Rot);
-  \path (168, 301) coordinate (Cave Bear);
-  \path (217, 295) coordinate (Harrower Infester);
+  \path (127.5, 307) coordinate (Bandit Scout);
+  \path (161.5, 308) coordinate (Cave Bear);
+
+  \path (215.5, 302) coordinate (Cultist);
   % end top row
 
   % middle row
-  \path (  2, 253) coordinate (Bandit Archer);
-  \path ( 36, 255) coordinate (Cultist);
+  \path (  2.5, 253) coordinate (Bandit Archer);
+  \path ( 36, 255) coordinate (Harrower Infester);
   \path ( 70, 255) coordinate (Living Corpse);
   \path (104, 263) coordinate (Chaos Demon);
   \path (154, 253) coordinate (Frost Demon);
@@ -206,7 +207,7 @@
   % end middle row
 
   % bottom row
-  \path (  3, 204) coordinate (Wind Demon);
+  \path (  3, 203) coordinate (Wind Demon);
   \path ( 36, 204) coordinate (Night Demon);
   \path ( 72, 204) coordinate (Flame Demon);
   \path (104, 204) coordinate (Earth Demon);
@@ -223,16 +224,17 @@
   \monster{Sun Demon}
   \tiltmonster[angle=2]{Wind Demon}
   \monster{Bandit Archer}
-  \monster{Bandit Scout}
+  \tiltmonster[angle=-2]{Bandit Scout}
   \tiltmone[angle=-2]{Living Bones}
   \tiltmtwo[angle=-2]{Living Bones}
-  \monster{Cultist}
+  \tiltmonster[angle=-3]{Cultist}
   \tiltmonster[angle=-1]{Living Corpse}
   \monster{Living Spirit}
   \monster{Night Demon}
   \monster[ angle=-90]{Chaos Demon}
   \monster[ angle=90]{Stone Construct}
-  \monster[ angle=90]{Cave Bear}
+  \xfullmonster{Cave Bear}{Cave Bear}{Cave Bear angle=90}{angle=-6.5}{angle=90}
+%  \monster[ angle=90]{Cave Bear}
   \monster{Savvas Lavaflow}
   \monster{Savvas Icestorm}
   \monster{Harrower Infester}
