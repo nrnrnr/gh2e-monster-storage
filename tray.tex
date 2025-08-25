@@ -180,8 +180,8 @@
 
 
 \begin{tikzpicture} % tray 2
-  \draw [thick] (1, 200) rectangle +(250,158) % full tray
-                  +(0,3) rectangle +(249,155);
+  \draw [thick] (1, 200) rectangle +(265,158) % full tray
+                  +(0,3) rectangle +(264,155);
 
   \draw [thick] (-2, 26) arc [start angle=-90, end angle=90, radius=4];
 
@@ -189,50 +189,51 @@
   \path (  2, 309) coordinate (Living Bones 1);
   \path ( 33.5, 309) coordinate (Living Bones 2);
   \path (65.5, 309) coordinate (Living Spirit);
-  \path (96, 303.5) coordinate (Crystal Rot);
+  \path (96, 304.5) coordinate (Crystal Rot);
 
   \path (127.5, 307) coordinate (Bandit Scout);
   \path (161.5, 308) coordinate (Cave Bear);
 
-  \path (215.5, 302) coordinate (Cultist);
+  \path (218, 300.5) coordinate (Harrower Infester);
   % end top row
 
   % middle row
-  \path (  2.5, 253) coordinate (Bandit Archer);
-  \path ( 36, 255) coordinate (Harrower Infester);
-  \path ( 70, 255) coordinate (Living Corpse);
-  \path (104, 263) coordinate (Chaos Demon);
-  \path (154, 253) coordinate (Frost Demon);
-  \path (191, 250) coordinate (Stone Construct);
+  \path (  3, 253) coordinate (Bandit Archer);
+  \path ( 36, 254) coordinate (Cultist);
+  \path ( 71.5, 255) coordinate (Living Corpse);
+  \path (107.5, 265) coordinate (Frost Demon);
+  \path (163.5, 254.5) coordinate (Chaos Demon);
+  \path (204, 252.5) coordinate (Stone Construct);
   % end middle row
 
   % bottom row
   \path (  3, 203) coordinate (Wind Demon);
-  \path ( 36, 204) coordinate (Night Demon);
-  \path ( 72, 204) coordinate (Flame Demon);
-  \path (104, 204) coordinate (Earth Demon);
-  \path (147, 204) coordinate (Sun Demon);
+  \path ( 39.5, 204) coordinate (Night Demon);
+  \path ( 76.5, 204) coordinate (Flame Demon);
+  \path (113, 204) coordinate (Earth Demon);
+  \path (158, 204) coordinate (Sun Demon);
 
-  \path (184, 204) coordinate (Savvas Lavaflow);
-  \path (218, 204) coordinate (Savvas Icestorm);
+  \path (198, 204) coordinate (Savvas Lavaflow);
+  \path (233, 204) coordinate (Savvas Icestorm);
   % bottom row
 
 
-  \monster{Frost Demon}
+  \monster[ angle=-90]{Frost Demon}
   \monster{Flame Demon}
   \monster{Earth Demon}
   \monster{Sun Demon}
   \tiltmonster[angle=2]{Wind Demon}
-  \monster{Bandit Archer}
+  \tiltmonster[angle=1]{Bandit Archer}
   \tiltmonster[angle=-2]{Bandit Scout}
   \tiltmone[angle=-2]{Living Bones}
   \tiltmtwo[angle=-2]{Living Bones}
-  \tiltmonster[angle=-3]{Cultist}
+  \tiltmonster{Cultist}
   \tiltmonster[angle=-1]{Living Corpse}
   \monster{Living Spirit}
   \monster{Night Demon}
-  \monster[ angle=-90]{Chaos Demon}
-  \monster[ angle=90]{Stone Construct}
+  \monster{Chaos Demon}
+%  \monster[ angle=90]{Stone Construct}
+  \xfullmonster{Stone Construct}{Stone Construct}{Stone Construct angle=90}{angle=2}{angle=90}
   \xfullmonster{Cave Bear}{Cave Bear}{Cave Bear angle=90}{angle=-6.5}{angle=90}
 %  \monster[ angle=90]{Cave Bear}
   \monster{Savvas Lavaflow}
