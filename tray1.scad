@@ -10,3 +10,10 @@ include <tray.scad>         // coordinates for each monster
                          // one module per try, building wells only
 
 tray1();
+
+color("red")
+translate([0,-200,0])
+  tray_block(tray1_ll, tray1_dimens, "left");
+
+
+% rail(30);
