@@ -51,6 +51,10 @@
   angle/.forward to=/tikz/rotate,
 }
 
+\newcommand\finger[1]{%
+  \draw [thick,fill=white, fill opacity=0.6] #1 circle (9.5mm);
+}
+
 \newcommand\monsterbase[3][]{%
   \node [image] at (#2) {\includegraphics[#1]{named/#3.png}};
   \draw [outline] (#2) \usepath{#3#1};
@@ -101,6 +105,7 @@
 
 %  \draw [thick,fill=white] (-1, 57) +(250,0) -- +(-9,0)
 %     arc [start angle=90, end angle=270, radius=9.5] +(0,0) -- +(9,0) -- cycle;
+
 
   % top row, tray 1
   \path (0.3, 109.5) coordinate (Deep Terror 1);
@@ -179,6 +184,11 @@
 
 %  \draw[ultra thick,x=0.058mm,y=0.058mm] (0, 0)
 %     node [anchor=south west] {\image{A01}} \usepath{A01};
+
+% finger commands go here
+
+
+
 \end{tikzpicture}
 
 
@@ -247,6 +257,8 @@
   \monster{Savvas Icestorm}
   \monster{Harrower Infester}
   \monster{Crystal Rot}
+
+% finger commands go here.
 
 \end{tikzpicture}
 
