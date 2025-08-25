@@ -51,8 +51,8 @@
   angle/.forward to=/tikz/rotate,
 }
 
-\newcommand\finger[1]{%
-  \draw [thick,fill=white, fill opacity=0.6] #1 circle (9.5mm);
+\newcommand\finger[2][9.5mm]{%
+  \draw [thick,fill=white, fill opacity=0.6] #2 circle (#1);
 }
 
 \newcommand\monsterbase[3][]{%
@@ -185,9 +185,33 @@
 %  \draw[ultra thick,x=0.058mm,y=0.058mm] (0, 0)
 %     node [anchor=south west] {\image{A01}} \usepath{A01};
 
-% finger commands go here
+\finger{(47.0, 129.9)}  % Deep Terror 2
+\finger{(15.4, 129.9)}  % Deep Terror 1
+\finger{(79.8, 129.0)}  % Ooze 1
+\finger{(113.9, 129.0)}  % Ooze 2
+\finger{(146, 127.0)}  % Giant Viper 1
+\finger{(176, 126)}  % Giant Viper 2
+\finger{(205.3, 129.4)}  % Spitting Drake
+\finger{(233.4, 127.7)}  % Rending Drake
 
+\finger{(20.3, 77.2)}  % Inox Guard
+\finger{(60.1, 77.6)}  % Inox Priest
+\finger{(102.5, 77.2)}  % Inox Archer
 
+\finger{(145, 93.5)}  % Vermling Priest
+\finger{(145, 65.5)}  % City Archer
+\finger{(185.5, 86)}  % Black Imp 1
+\finger{(187, 54)}  % Black Imp 2
+\finger{(223.6, 83.1)}  % Lurker Soldier
+
+\finger{(14.9, 21.4)}  % Vermling Scout 1
+\finger{(44.3, 21.4)}  % Vermling Scout 2
+\finger{(73.8, 23.1)}  % Forest Imp 1
+\finger{(106, 26.9)}  % Forest Imp 2
+\finger{(137.9, 26.3)}  % City Guard
+\finger{(171, 20.1)}  % Ancient Artillery
+\finger{(202.9, 17.9)}  % Hound 1
+\finger{(233.7, 17.9)}  % Hound 2
 
 \end{tikzpicture}
 
@@ -258,7 +282,26 @@
   \monster{Harrower Infester}
   \monster{Crystal Rot}
 
-% finger commands go here.
+\finger{(235.0, 327.4)}  % Harrower Infester
+\finger{(185.8, 333.9)}  % Cave Bear
+\finger{(20.6, 226.7)}  % Wind Demon
+\finger{(145.2, 329.7)}  % Bandit Scout
+\finger{(225.6, 282.9)}  % Stone Construct
+\finger{(52.8, 280.2)}  % Cultist
+\finger{(176.4, 228.3)}  % Sun Demon
+\finger{(57.0, 228.1)}  % Night Demon
+\finger{(111.1, 329.2)}  % Crystal Rot
+\finger{(93.9, 228.5)}  % Flame Demon
+\finger{(125.8, 291.7)}  % Frost Demon
+\finger{(19.5, 279.7)}  % Bandit Archer
+\finger{(16.7, 331.6)}  % Living Bones 1
+\finger{(248.5, 228.1)}  % Savvas Icestorm
+\finger{(48.2, 331.6)}  % Living Bones 2
+\finger{(79.8, 329.9)}  % Living Spirit
+\finger{(214.2, 228.5)}  % Savvas Lavaflow
+\finger{(182.3, 278.9)}  % Chaos Demon
+\finger{(134.6, 232.7)}  % Earth Demon
+\finger{(88.1, 280.7)}  % Living Corpse
 
 \end{tikzpicture}
 
