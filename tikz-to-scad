@@ -119,7 +119,7 @@ BEGIN {
 }
 
 # Parse monster commands for tray generation (only inside tikzpicture)
-/\\(fullmonster|monster|mone|mtwo|monsterpair|monsterx|tiltmone|tiltmtwo|tiltmonster)/ && in_tikzpicture {
+/\\(fullmonster|xfullmonster|monster|mone|mtwo|monsterpair|monsterx|tiltmone|tiltmtwo|tiltmonster)/ && in_tikzpicture {
     record_monster_usage($0, current_tray)
 }
 
@@ -167,10 +167,25 @@ function record_monster_usage(line, tray_num) {
     command_type = ""
     coord_name = ""
     
-    # Extract angle from optional arguments or from any argument containing "angle="
+    # Extract angle from optional arguments or from specific arguments based on command type
+    path_angle = 0   # For path function parameter
+    placement_angle = 0  # For OpenSCAD rotate
+    
     if (parsed_cmd_optional != "" && match(parsed_cmd_optional, /angle=([^,}]+)/, angle_parts)) {
         gsub(/[^-0-9.]/, "", angle_parts[1])
         angle = angle_parts[1]
+    } else if (parsed_cmd_name == "xfullmonster" && parsed_cmd_args_count >= 4) {
+        # For xfullmonster, extract both path angle (arg 3) and placement angle (arg 4)
+        if (match(parsed_cmd_args[3], /angle=([^,}]+)/, path_parts)) {
+            gsub(/[^-0-9.]/, "", path_parts[1])
+            path_angle = path_parts[1]
+        }
+        if (match(parsed_cmd_args[4], /angle=([^,}]+)/, place_parts)) {
+            gsub(/[^-0-9.]/, "", place_parts[1])
+            placement_angle = place_parts[1]
+        }
+        # For consistency with other commands, use placement_angle as the main angle
+        angle = placement_angle
     } else {
         # Check all arguments for angle= pattern
         for (i = 1; i <= parsed_cmd_args_count; i++) {
@@ -240,6 +255,7 @@ function record_monster_usage(line, tray_num) {
         monster_usages[usage_key]["tray"] = tray_num
         monster_usages[usage_key]["line"] = line
         monster_usages[usage_key]["angle"] = angle
+        monster_usages[usage_key]["path_angle"] = path_angle
     }
 }
 
@@ -253,10 +269,12 @@ END {
         coord = monster_usages[i]["coord"]
         monster = monster_usages[i]["monster"] 
         angle = monster_usages[i]["angle"]
+        path_angle = monster_usages[i]["path_angle"]
         
         if (coord != "") {
             coord_to_monster[coord]["monster"] = monster
             coord_to_monster[coord]["angle"] = angle
+            coord_to_monster[coord]["path_angle"] = path_angle
         }
     }
     
@@ -264,47 +282,64 @@ END {
     for (i = 0; i < coord_count; i++) {
         name = coord_names[i]
         
-        # Get the monster base name and angle from usage data
+        # Get the monster base name and angles from usage data
         if (name in coord_to_monster) {
             monster_base = coord_to_monster[name]["monster"]
-            angle = coord_to_monster[name]["angle"]
+            placement_angle = coord_to_monster[name]["angle"]
+            path_angle = coord_to_monster[name]["path_angle"]
         } else {
             # Fallback: derive base monster name (remove trailing numbers)
             monster_base = name
             gsub(/_[0-9]+$/, "", monster_base)
-            angle = 0
+            placement_angle = 0
+            path_angle = 0
         }
         
-        # Validate angle and determine rotation strategy
-        abs_angle = (angle < 0) ? -angle : angle
-        
-        if (abs_angle <= 15) {
-            # Small rotation: use OpenSCAD rotate
-            if (angle == 0) {
+        # For xfullmonster commands, use both angles
+        # For other commands, use traditional logic
+        if (path_angle != 0 && placement_angle != 0) {
+            # xfullmonster case: use path_angle for path function, placement_angle for rotate
+            # Normalize path angle to standard values
+            norm_path_angle = path_angle
+            while (norm_path_angle > 180) norm_path_angle -= 360
+            while (norm_path_angle <= -180) norm_path_angle += 360
+            
+            printf "module %s() {\n", name
+            printf "  rotate([0, 0, %g]) polygon(%s_path(%g));\n", placement_angle, monster_base, norm_path_angle
+            printf "}\n\n"
+        } else {
+            # Traditional single-angle logic
+            angle = (placement_angle != 0) ? placement_angle : path_angle
+            abs_angle = (angle < 0) ? -angle : angle
+            
+            if (abs_angle <= 15) {
+                # Small rotation: use OpenSCAD rotate
+                if (angle == 0) {
+                    printf "module %s() {\n", name
+                    printf "  polygon(%s_path(0));\n", monster_base
+                    printf "}\n\n"
+                } else {
+                    printf "module %s() {\n", name
+                    printf "  rotate([0, 0, %g]) polygon(%s_path(0));\n", angle, monster_base
+                    printf "}\n\n"
+                }
+            } else if (abs_angle == 90 || abs_angle == 180 || abs_angle == 270 || (abs_angle > 270 && abs_angle <= 360)) {
+                # Large rotation: use path function angle parameter
+                # Normalize angle to standard values
+                norm_angle = angle
+                while (norm_angle > 180) norm_angle -= 360
+                while (norm_angle <= -180) norm_angle += 360
+                
+                printf "module %s() {\n", name
+                printf "  polygon(%s_path(%g));\n", monster_base, norm_angle
+                printf "}\n\n"
+            } else {
+                # Invalid angle range
+                printf "// ERROR: Invalid angle %g for %s (must be <=15 or 90/180/270 degrees)\n", angle, name > "/dev/stderr"
                 printf "module %s() {\n", name
                 printf "  polygon(%s_path(0));\n", monster_base
                 printf "}\n\n"
-            } else {
-                printf "module %s() {\n", name
-                printf "  rotate([0, 0, %g]) polygon(%s_path(0));\n", angle, monster_base
-                printf "}\n\n"
             }
-        } else if (abs_angle == 90 || abs_angle == 180 || abs_angle == 270 || (abs_angle > 270 && abs_angle <= 360)) {
-            # Large rotation: use path function angle parameter
-            # Normalize angle to standard values
-            norm_angle = angle
-            while (norm_angle > 180) norm_angle -= 360
-            while (norm_angle <= -180) norm_angle += 360
-            
-            printf "module %s() {\n", name
-            printf "  polygon(%s_path(%g));\n", monster_base, norm_angle
-            printf "}\n\n"
-        } else {
-            # Invalid angle range
-            printf "// ERROR: Invalid angle %g for %s (must be <=15 or 90/180/270 degrees)\n", angle, name > "/dev/stderr"
-            printf "module %s() {\n", name
-            printf "  polygon(%s_path(0));\n", monster_base
-            printf "}\n\n"
         }
     }
     
@@ -382,6 +417,7 @@ function generate_tray_module(tray_num) {
         coord = monster_usages[i]["coord"]
         type = monster_usages[i]["type"]
         angle = monster_usages[i]["angle"]
+        path_angle = monster_usages[i]["path_angle"]
         
         monster_lookup = monster
         gsub(/_/, " ", monster_lookup)
@@ -392,19 +428,22 @@ function generate_tray_module(tray_num) {
             well_count = 5  # Split into wells of 5 each
         }
         
+        # Never apply rotation in tray - all rotations are handled in monster modules
+        use_tray_rotation = 0
+        
         if (type == "pair") {
             # Generate two wells for monsterpair
             printf "  translate([%s.x, %s.y, 0]) well(%d) ", monster "_1", monster "_1", well_count
-            if (angle != 0) printf "rotate([0,0,%g]) ", angle
+            if (use_tray_rotation) printf "rotate([0,0,%g]) ", angle
             printf "%s();\n", monster "_1"
             
             printf "  translate([%s.x, %s.y, 0]) well(%d) ", monster "_2", monster "_2", well_count  
-            if (angle != 0) printf "rotate([0,0,%g]) ", angle
+            if (use_tray_rotation) printf "rotate([0,0,%g]) ", angle
             printf "%s();\n", monster "_2"
         } else {
             # Generate single well
             printf "  translate([%s.x, %s.y, 0]) well(%d) ", coord, coord, well_count
-            if (angle != 0) printf "rotate([0,0,%g]) ", angle
+            if (use_tray_rotation) printf "rotate([0,0,%g]) ", angle
             printf "%s();\n", coord
         }
     }
