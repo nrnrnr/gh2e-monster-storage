@@ -9,8 +9,8 @@ include <tray.scad>         // coordinates for each monster
 
                          // one module per try, building wells only
 
-%difference() {
+difference() {
   tray_block(tray1_ll, tray1_dimens, "left");
-  tray1();
+  tray1_outlines();
 }
 

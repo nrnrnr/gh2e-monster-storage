@@ -439,7 +439,7 @@ function validate_and_generate_trays() {
 }
 
 function generate_tray_module(tray_num) {
-    printf "module tray%d() {\n", tray_num
+    printf "module tray%d_outlines() {\n", tray_num
     
     # Generate wells for this tray
     for (i = 0; i < monster_usage_count; i++) {
