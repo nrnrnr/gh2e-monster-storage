@@ -132,6 +132,22 @@ BEGIN {
     }
 }
 
+# Parse finger commands
+/\\finger\{.*\}/ && in_tikzpicture {
+    if (match($0, /\\finger\{\(([^,]+),([^)]+)\)\}/, finger_parts)) {
+        finger_x = finger_parts[1]
+        finger_y = finger_parts[2]
+        
+        # Clean up coordinates (remove spaces)
+        gsub(/[ \t]/, "", finger_x)
+        gsub(/[ \t]/, "", finger_y)
+        
+        # Store finger coordinates for this tray
+        finger_coords[current_tray][++finger_counts[current_tray]]["x"] = finger_x
+        finger_coords[current_tray][finger_counts[current_tray]]["y"] = finger_y
+    }
+}
+
 # Parse monster commands for tray generation (only inside tikzpicture)
 /\\(fullmonster|xfullmonster|monster|mone|mtwo|monsterpair|monsterx|tiltmone|tiltmtwo|tiltmonster)/ && in_tikzpicture {
     record_monster_usage($0, current_tray)
@@ -436,6 +452,11 @@ function validate_and_generate_trays() {
     printf "\n// Tray modules\n"
     generate_tray_module(1)
     generate_tray_module(2)
+    
+    # Generate finger modules
+    printf "\n// Finger modules\n"
+    generate_finger_module(1)
+    generate_finger_module(2)
 }
 
 function generate_tray_module(tray_num) {
@@ -477,6 +498,21 @@ function generate_tray_module(tray_num) {
             printf "  translate([%s.x, %s.y, 0]) well(%d) ", coord, coord, well_count
             if (use_tray_rotation) printf "rotate([0,0,%g]) ", angle
             printf "%s();\n", coord
+        }
+    }
+    
+    printf "}\n\n"
+}
+
+function generate_finger_module(tray_num) {
+    printf "module fingers%d() {\n", tray_num
+    
+    # Generate finger calls for this tray
+    if (tray_num in finger_counts) {
+        for (i = 1; i <= finger_counts[tray_num]; i++) {
+            finger_x = finger_coords[tray_num][i]["x"]
+            finger_y = finger_coords[tray_num][i]["y"]
+            printf "  finger(%s, %s);\n", finger_x, finger_y
         }
     }
     
