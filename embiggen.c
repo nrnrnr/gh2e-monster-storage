@@ -1,162 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
-#include <ctype.h>
+#include <netpbm/pbm.h>
+#include <netpbm/pm.h>
 #include "embiggen.h"
 
-// Create new bitmap with given dimensions
-pbm_bitmap *pbm_new(int width, int height) {
-    pbm_bitmap *bitmap = malloc(sizeof(pbm_bitmap));
-    if (!bitmap) return NULL;
-    
-    bitmap->width = width;
-    bitmap->height = height;
-    
-    // Allocate array of column pointers
-    bitmap->pixels = malloc(width * sizeof(bool*));
-    if (!bitmap->pixels) {
-        free(bitmap);
-        return NULL;
-    }
-    
-    // Allocate each column
-    for (int x = 0; x < width; x++) {
-        bitmap->pixels[x] = calloc(height, sizeof(bool));
-        if (!bitmap->pixels[x]) {
-            // Clean up on failure
-            for (int i = 0; i < x; i++) {
-                free(bitmap->pixels[i]);
-            }
-            free(bitmap->pixels);
-            free(bitmap);
-            return NULL;
-        }
-    }
-    
-    return bitmap;
-}
-
-// Free bitmap memory
-void pbm_free(pbm_bitmap *bitmap) {
-    if (!bitmap) return;
-    
-    if (bitmap->pixels) {
-        for (int x = 0; x < bitmap->width; x++) {
-            free(bitmap->pixels[x]);
-        }
-        free(bitmap->pixels);
-    }
-    free(bitmap);
-}
-
-// Read PBM from file descriptor
-pbm_bitmap *pbm_read(FILE *fd) {
-    char line[256];
-    char format[8];
-    int width, height;
-    
-    // Read header
-    if (!fgets(line, sizeof(line), fd)) {
-        fprintf(stderr, "Error reading PBM header\n");
-        return NULL;
-    }
-    
-    // Parse format
-    if (sscanf(line, "%7s %d %d", format, &width, &height) == 3) {
-        // Header on one line
-    } else if (sscanf(line, "%7s", format) == 1) {
-        // Format on separate line, read dimensions
-        if (!fgets(line, sizeof(line), fd)) {
-            fprintf(stderr, "Error reading PBM dimensions\n");
-            return NULL;
-        }
-        if (sscanf(line, "%d %d", &width, &height) != 2) {
-            fprintf(stderr, "Error parsing PBM dimensions\n");
-            return NULL;
-        }
-    } else {
-        fprintf(stderr, "Error parsing PBM header\n");
-        return NULL;
-    }
-    
-    // Validate format
-    if (strcmp(format, "P1") != 0) {
-        fprintf(stderr, "Need plain PBM format (P1), got %s\n", format);
-        return NULL;
-    }
-    
-    // Skip comments
-    int c;
-    while ((c = fgetc(fd)) != EOF) {
-        if (c == '#') {
-            // Skip comment line
-            while ((c = fgetc(fd)) != EOF && c != '\n');
-        } else if (isspace(c)) {
-            continue;
-        } else {
-            ungetc(c, fd);
-            break;
-        }
-    }
-    
-    // Create bitmap
-    pbm_bitmap *bitmap = pbm_new(width, height);
-    if (!bitmap) {
-        fprintf(stderr, "Failed to allocate bitmap\n");
-        return NULL;
-    }
-    
-    // Read pixel data
-    int row = 0, col = 0;
-    while ((c = fgetc(fd)) != EOF) {
-        if (c == '0' || c == '1') {
-            if (row >= height || col >= width) {
-                fprintf(stderr, "Too many pixels in PBM data\n");
-                pbm_free(bitmap);
-                return NULL;
-            }
-            
-            // Note: Lua uses [col][row], x=col, y=row indexing
-            bitmap->pixels[col][row] = (c == '1');
-            col++;
-            if (col >= width) {
-                col = 0;
-                row++;
-            }
-        } else if (isspace(c)) {
-            continue;
-        } else {
-            fprintf(stderr, "Invalid character in PBM data: %c\n", c);
-            pbm_free(bitmap);
-            return NULL;
-        }
-    }
-    
-    if (row != height || col != 0) {
-        fprintf(stderr, "Incomplete PBM data: expected %d pixels, got %d\n", 
-                width * height, row * width + col);
-        pbm_free(bitmap);
-        return NULL;
-    }
-    
-    return bitmap;
-}
-
-// Write PBM to file descriptor
-void pbm_write(FILE *fd, pbm_bitmap *bitmap) {
-    fprintf(fd, "P1 %d %d\n", bitmap->width, bitmap->height);
-    
-    for (int y = 0; y < bitmap->height; y++) {
-        for (int x = 0; x < bitmap->width; x++) {
-            if ((x + 1) % 65 == 64) {
-                fputc('\n', fd);
-            }
-            fputc(bitmap->pixels[x][y] ? '1' : '0', fd);
-        }
-        fputc('\n', fd);
-    }
-}
+// Coordinate pair for offset calculations
+typedef struct {
+    int x;
+    int y;
+} coord_pair;
 
 // Comparison function for coordinate sorting (by distance from origin, then lexicographic)
 int coord_compare(const void *a, const void *b) {
@@ -178,7 +31,7 @@ int coord_compare(const void *a, const void *b) {
 coord_pair *calculate_offsets(double delta, int *count) {
     int max_coords = (int)((delta + 1) * (delta + 1) * 4 + 10);  // Generous estimate
     coord_pair *coords = malloc(max_coords * sizeof(coord_pair));
-    if (!coords) return NULL;
+    if (!coords) pm_error("Failed to allocate coordinate array");
     
     double d2 = delta * delta;
     int n = 0;
@@ -212,30 +65,34 @@ coord_pair *calculate_offsets(double delta, int *count) {
     return coords;
 }
 
+// Read PBM file using netpbm library
+bit **pbm_read_file(FILE *fp, int *cols, int *rows) {
+    return pbm_readpbm(fp, cols, rows);
+}
+
+// Write PBM file using netpbm library (compact format)
+void pbm_write_file(FILE *fp, bit **bits, int cols, int rows) {
+    pbm_writepbm(fp, bits, cols, rows, 0);  // 0 = use compact format
+}
+
 // Embiggen bitmap by delta pixels
-pbm_bitmap *embiggen(pbm_bitmap *input, double delta) {
+bit **embiggen(bit **input, int cols, int rows, double delta, int *out_cols, int *out_rows) {
     fprintf(stderr, "Embiggening at delta %g\n", delta);
     
     // Calculate offset coordinates
     int coord_count;
     coord_pair *coords = calculate_offsets(delta, &coord_count);
-    if (!coords) {
-        fprintf(stderr, "Failed to calculate coordinates\n");
-        return NULL;
-    }
     
-    // Create output bitmap
-    pbm_bitmap *output = pbm_new(input->width, input->height);
-    if (!output) {
-        free(coords);
-        return NULL;
-    }
+    // Create output bitmap (same dimensions)
+    bit **output = pbm_allocarray(cols, rows);
+    *out_cols = cols;
+    *out_rows = rows;
     
     // For each pixel in output
     long tests = 0;
-    for (int col = 0; col < input->width; col++) {
-        for (int row = 0; row < input->height; row++) {
-            output->pixels[col][row] = false;
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < cols; col++) {
+            output[row][col] = PBM_WHITE;
             
             // Check each offset coordinate
             for (int i = 0; i < coord_count; i++) {
@@ -249,9 +106,9 @@ pbm_bitmap *embiggen(pbm_bitmap *input, double delta) {
                 int y = row + coords[i].y;
                 
                 // Check bounds and pixel value
-                if (x >= 0 && x < input->width && y >= 0 && y < input->height) {
-                    if (input->pixels[x][y]) {
-                        output->pixels[col][row] = true;
+                if (x >= 0 && x < cols && y >= 0 && y < rows) {
+                    if (input[y][x] == PBM_BLACK) {
+                        output[row][col] = PBM_BLACK;
                         break;
                     }
                 }

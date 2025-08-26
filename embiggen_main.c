@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <netpbm/pbm.h>
+#include <netpbm/pm.h>
 #include "embiggen.h"
 
 void usage(const char *progname) {
@@ -16,6 +18,9 @@ int main(int argc, char *argv[]) {
     double dpi = 300.0;
     double mm = -1.0;  // Required parameter
     char *filename = NULL;
+    
+    // Initialize netpbm
+    pbm_init(&argc, argv);
     
     // Manual argument parsing to handle -dpi and -mm
     for (int i = 1; i < argc; i++) {
@@ -40,47 +45,35 @@ int main(int argc, char *argv[]) {
     // Open input file
     FILE *input_fd;
     if (filename) {
-        // Use pnmtoplainpnm to convert input to plain PBM
-        char command[1024];
-        snprintf(command, sizeof(command), "pnmtoplainpnm %s", filename);
-        input_fd = popen(command, "r");
+        input_fd = fopen(filename, "rb");
         if (!input_fd) {
-            fprintf(stderr, "Error: Failed to open input file through pnmtoplainpnm\n");
-            exit(1);
+            pm_error("Failed to open input file: %s", filename);
         }
     } else {
         input_fd = stdin;
     }
     
     // Read input bitmap
-    pbm_bitmap *input = pbm_read(input_fd);
-    if (!input) {
-        fprintf(stderr, "Error: Failed to read PBM input\n");
-        if (filename) pclose(input_fd);
-        exit(1);
-    }
+    int cols, rows;
+    bit **input = pbm_read_file(input_fd, &cols, &rows);
     
     if (filename) {
-        pclose(input_fd);
+        fclose(input_fd);
     }
     
     // Calculate delta in pixels
     double delta = dpi * mm / 25.4;
     
     // Embiggen the bitmap
-    pbm_bitmap *output = embiggen(input, delta);
-    if (!output) {
-        fprintf(stderr, "Error: Failed to embiggen bitmap\n");
-        pbm_free(input);
-        exit(1);
-    }
+    int out_cols, out_rows;
+    bit **output = embiggen(input, cols, rows, delta, &out_cols, &out_rows);
     
     // Write output
-    pbm_write(stdout, output);
+    pbm_write_file(stdout, output, out_cols, out_rows);
     
     // Cleanup
-    pbm_free(input);
-    pbm_free(output);
+    pbm_freearray(input, rows);
+    pbm_freearray(output, out_rows);
     
     return 0;
 }

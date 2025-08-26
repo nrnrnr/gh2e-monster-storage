@@ -115,7 +115,7 @@ $B/%-numbered.jpg: $B/regions-%.txt %.jpg number-regions
 # C embiggen implementation
 CC=gcc
 CFLAGS='-Wall -Wextra -std=c99 -O2'
-LDFLAGS=-lm
+LDFLAGS=-lm -lnetpbm
 
 embiggen:D: embiggen_main.o embiggen.o
 	$CC -o $target $prereq $LDFLAGS
