@@ -69,7 +69,7 @@
 }
 
 \newif\ifdots
-\dotstrue
+\dotsfalse
 
 \newcommand\finger[2][9.5mm]{%
   \draw [thick,fill=white, fill opacity=0.6] #2 circle (#1);
@@ -137,9 +137,9 @@
 \newcommand\tiltmtwo[2][]{%
   \monsterx[#1]{#2 2}{#2}}
 
-\ifdots
-  \let\includegraphics=\nographics
-\fi
+
+% \let\includegraphics=\nographics
+
 
 \begin{tikzpicture}
   \draw [thick] (-1,-2) rectangle +(250,156) % full tray
