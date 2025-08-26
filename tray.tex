@@ -69,7 +69,7 @@
 }
 
 \newif\ifdots
-\dotsfalse
+\dotstrue
 
 \newcommand\finger[2][9.5mm]{%
   \draw [thick,fill=white, fill opacity=0.6] #2 circle (#1);
@@ -137,7 +137,9 @@
 \newcommand\tiltmtwo[2][]{%
   \monsterx[#1]{#2 2}{#2}}
 
-%\let\includegraphics=\nographics
+\ifdots
+  \let\includegraphics=\nographics
+\fi
 
 \begin{tikzpicture}
   \draw [thick] (-1,-2) rectangle +(250,156) % full tray
@@ -337,30 +339,30 @@
   \monster{Crystal Rot}
 
 % Top row (left to right)
-\finger{(17.7, 331.6)}  % Living Bones 1
-\finger{(49.2, 331.6)}  % Living Bones 2
-\finger{(80.2, 329.9)}  % Living Spirit
-\finger{(111.2, 329.2)}  % Crystal Rot
-\finger{(146, 329.7)}  % Bandit Scout
-\finger{(191, 330.9)}  % Cave Bear
-\finger{(235.5, 327.4)}  % Harrower Infester
+\finger{(17.0, 330.0)}  % Living Bones 1
+\finger{(48.2, 330.0)}  % Living Bones 2
+\finger{(80.0, 328.6)}  % Living Spirit
+\finger{(111.0, 328.6)}  % Crystal Rot
+\finger{(145.8, 328.0)}  % Bandit Scout
+\finger{(190.8, 329.2)}  % Cave Bear
+\finger{(234.5, 324.4)}  % Harrower Infester
 
 % Middle row (left to right)
-\finger{(19.5, 279.7)}  % Bandit Archer
-\finger{(52.8, 280.2)}  % Cultist
-\finger{(88.1, 280.7)}  % Living Corpse
-\finger{(135, 284.5)}  % Frost Demon
-\finger{(182.3, 280)}  % Chaos Demon
-\finger{(232, 278)}  % Stone Construct
+\finger{(18.5, 279.2)}  % Bandit Archer
+\finger{(52.6, 278.2)}  % Cultist
+\finger{(87.8, 278.2)}  % Living Corpse
+\finger{(133.3, 283.2)}  % Frost Demon
+\finger{(182.0, 278.6)}  % Chaos Demon
+\finger{(234, 276)}  % Stone Construct
 
 % Bottom row (left to right)
-\finger{(20.6, 226.7)}  % Wind Demon
-\finger{(57.0, 228.1)}  % Night Demon
-\finger{(93.9, 228.5)}  % Flame Demon
-\finger{(134.6, 232.7)}  % Earth Demon
-\finger{(176.4, 228.3)}  % Sun Demon
-\finger{(214.2, 228.5)}  % Savvas Lavaflow
-\finger{(248.5, 228.1)}  % Savvas Icestorm
+\finger{(20.2, 225.7)}  % Wind Demon
+\finger{(57.1, 227.1)}  % Night Demon
+\finger{(93.6, 228.1)}  % Flame Demon
+\finger{(134.0, 232.0)}  % Earth Demon
+\finger{(177.2, 227.6)}  % Sun Demon
+\finger{(214.4, 227.4)}  % Savvas Lavaflow
+\finger{(248.3, 227.0)}  % Savvas Icestorm
 
 \end{tikzpicture}
 
