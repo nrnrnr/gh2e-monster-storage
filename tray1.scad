@@ -70,6 +70,6 @@ module tray1_test() {
 
 
 
-% tray1();
+tray1();
 
 
