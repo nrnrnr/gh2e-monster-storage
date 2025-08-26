@@ -13,7 +13,12 @@ do
   embiggenmm=0.9  # 0.6mm clearance plus 0.3mm filament overhang
                   # this looked very small on the test tray
 
-  embiggenmm=1.1
+  embiggenmm=1.1 # printed test, gets an extra 2mm on hound,
+                 # 1.3mm on ancient artillery
+
+  embiggenmm=0.6 # second print test, ancient artillery and hound
+
+  embiggenmm=0.9 # third print test, full tray 1
 
   paddingpixels=$(lua -e "print(math.ceil($paddingmm * $ppm / 1000.0))")
 

@@ -42,8 +42,9 @@
   y=1mm,
   image/.style={
     anchor=south west,
-    xshift=-0mm,
-    yshift=-0mm,
+    % shift 0 for embiggenmm = 1.1
+    xshift=-0.8mm, % for embiggenmm = 0.6 
+    yshift=-0.8mm,
   },
   outline/.style={
     ultra thick,
@@ -96,7 +97,7 @@
 
 %  \draw [thick] (-1, 34.5) arc [start angle=-90, end angle=90, radius=8.5];
 
-  \draw [thick,fill=white!70!gray] (-1, 57) ++(250,0) -- ++(-9,0)
+  \draw [thick,fill=white!70!gray] (-1, 55.5) ++(250,0) -- ++(-9,0)
      arc [start angle=90, end angle=270, radius=9.5] -- ++(9,0)
      -- ++(0, 19) -- cycle;
 
@@ -242,8 +243,8 @@
   % middle row
   \path (  3.5, 253) coordinate (Bandit Archer);
   \path ( 36, 254) coordinate (Cultist);
-  \path ( 71.5, 255) coordinate (Living Corpse);
-  \path (107.5, 265) coordinate (Frost Demon);
+  \path ( 71.3, 255) coordinate (Living Corpse);
+  \path (106.9, 265) coordinate (Frost Demon);
   \path (163.5, 254.5) coordinate (Chaos Demon);
   \path (203, 252.5) coordinate (Stone Construct);
   % end middle row
@@ -251,13 +252,17 @@
   % bottom row
   \path (  3, 203) coordinate (Wind Demon);
   \path ( 39.5, 204) coordinate (Night Demon);
-  \path ( 76.5, 204) coordinate (Flame Demon);
-  \path (113.5, 204) coordinate (Earth Demon);
-  \path (158.5, 204) coordinate (Sun Demon);
+  \path ( 76.2, 204) coordinate (Flame Demon);
+  \path (113.0, 204) coordinate (Earth Demon);
+  \path (159.5, 204) coordinate (Sun Demon);
 
-  \path (197.5, 204) coordinate (Savvas Lavaflow);
+  \path (197.9, 204) coordinate (Savvas Lavaflow);
   \path (233, 204) coordinate (Savvas Icestorm);
   % bottom row
+
+  \draw [red,thin] (1, 200) ++(156.1, -10) -- ++(0,65) --
+            ++(4.5,12) -- ++(0, 35)
+      ;
 
 
   \monster[ angle=-90]{Frost Demon}
