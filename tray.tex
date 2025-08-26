@@ -10,6 +10,14 @@
   \else
     \csname path-#1\endcsname
   \fi}
+\newcommand\defcentroid[2]{%
+  \expandafter\def\csname centroid-#1\endcsname{#2}}
+\newcommand\usecentroid[1]{%
+  \expandafter\ifx\csname centroid-#1\endcsname\relax
+     \GenericError{}{Centroid #1 is not defined}{Check spelling}{}
+  \else
+    \csname centroid-#1\endcsname
+  \fi}
 \newcommand\setdpi[2]{%
   \expandafter\def\csname dpi-#1\endcsname{#2}}
 \newcommand\usedpi[1]{%
@@ -52,6 +60,14 @@
   angle/.forward to=/tikz/rotate,
 }
 
+\newcommand\nographics[2][]{\relax}
+
+\def\unangle[angle=#1]{#1}
+
+\newcommand\tiltcentroid[3][angle=0]{% angle, ll_coordinate, centroid
+  ([rotate around={\unangle[#1]:#2}] $(#2)+(#3)$)
+}
+
 \newcommand\finger[2][9.5mm]{%
   \draw [thick,fill=white, fill opacity=0.6] #2 circle (#1);
 }
@@ -59,21 +75,32 @@
 \newcommand\monsterbase[3][]{%
   \node [image] at (#2) {\includegraphics[#1]{named/#3.png}};
   \draw [outline] (#2) \usepath{#3#1};
+  \draw [red,fill] (#2) \expandafter+\usecentroid{#3#1} circle (1mm);
 }
 
 \newcommand\monsterx[3][]{%
   \node [image,#1] at (#2) {\includegraphics{named/#3.png}};
   \draw [outline,#1] (#2) \usepath{#3};
+  \node at (0,0) {
+      \xdef\drawme{%
+    \noexpand\draw
+       [blue,fill,rotate around={\unangle[#1]:(#2)}] (#2)
+          \noexpand\expandafter+\noexpand\usecentroid{#3} circle (1mm)
+      }};
+%  \draw [blue,fill] (#2) \expandafter+\usecentroid{#3#1} circle (1mm);
+  \drawme;
 }
 
 \newcommand\fullmonster[4]{% coordinate image path imageparms outlineparms
   \node [image,#4] at (#1) {\includegraphics{named/#2.png}};
   \draw [outline,#4] (#1) \usepath{#3};
+%  \draw [red,fill] (#1) \expandafter+\usecentroid{#3} circle (1mm);
 }
 
 \newcommand\xfullmonster[5]{% coordinate image path imageparms outlineparms gfxparms
   \node [image,#4] at (#1) {\includegraphics[#5]{named/#2.png}};
   \draw [outline,#4] (#1) \usepath{#3};
+%  \draw [red,fill] (#1) \expandafter+\usecentroid{#3} circle (1mm);
 }
 
 \newcommand\tiltmonster[2][]{%
@@ -90,10 +117,11 @@
 \newcommand\tiltmtwo[2][]{%
   \monsterx[#1]{#2 2}{#2}}
 
+\let\includegraphics=\nographics
 
 \begin{tikzpicture}
   \draw [thick] (-1,-2) rectangle +(250,156) % full tray
-                  +(1,3) rectangle +(250,153);
+                  +(2,3) rectangle +(250,153);
 
 %  \draw [thick] (-1, 34.5) arc [start angle=-90, end angle=90, radius=8.5];
 
@@ -109,16 +137,16 @@
 
 
   % top row, tray 1
-  \path (0.3, 109.5) coordinate (Deep Terror 1);
-  \path (31.9, 109.5) coordinate (Deep Terror 2);
+  \path (1.3, 109.5) coordinate (Deep Terror 1);
+  \path (32.8, 109.5) coordinate (Deep Terror 2);
 
-  \path (63.6, 109) coordinate (Ooze 1);
-  \path (97.7, 109) coordinate (Ooze 2);
+  \path (64.2, 109) coordinate (Ooze 1);
+  \path (98.1, 109) coordinate (Ooze 2);
 
-  \path (131.0, 112) coordinate (Giant Viper 1);
-  \path (162, 109.5) coordinate (Giant Viper 2);
+  \path (131.4, 112) coordinate (Giant Viper 1);
+  \path (162.4, 109.5) coordinate (Giant Viper 2);
 
-  \path (191, 110) coordinate (Spitting Drake);
+  \path (191.4, 110) coordinate (Spitting Drake);
   \path (220.6, 110) coordinate (Rending Drake);
   % end of top row
 
@@ -135,18 +163,18 @@
 
 
   % bottom row, tray 1
-  \path (0.0,1.8) coordinate (Vermling Scout 1);
-  \path (29.4,1.8) coordinate (Vermling Scout 2);
-  \path (59.3,2.0) coordinate (Forest Imp 1);
-  \path (88.4,5.8) coordinate (Forest Imp 2);
-  \path (121.8,1.6) coordinate (City Guard);
-  \path (154.7,1.5) coordinate (Ancient Artillery);
-  \path (188.2,1.3) coordinate (Hound 1);
+  \path (1.0,1.8) coordinate (Vermling Scout 1);
+  \path (30.3,1.8) coordinate (Vermling Scout 2);
+  \path (60.1,2.0) coordinate (Forest Imp 1);
+  \path (89.1,5.8) coordinate (Forest Imp 2);
+  \path (122.4,1.6) coordinate (City Guard);
+  \path (155.2,1.5) coordinate (Ancient Artillery);
+  \path (188.6,1.3) coordinate (Hound 1);
   \path (219,1.3) coordinate (Hound 2);
   % end of bottom row
 
 
-  \draw[red,ultra thick] (152,-2) rectangle (220, 42);
+%  \draw[red,ultra thick] (152,-2) rectangle (220, 42);
 
 
 \fullmonster{Vermling Scout 1}{Vermling Scout}{Vermling Scout}{angle=-2}
@@ -187,14 +215,14 @@
 %  \draw[ultra thick,x=0.058mm,y=0.058mm] (0, 0)
 %     node [anchor=south west] {\image{A01}} \usepath{A01};
 
-\finger{(47.0, 129.9)}  % Deep Terror 2
-\finger{(15.4, 129.9)}  % Deep Terror 1
-\finger{(79.8, 129.0)}  % Ooze 1
-\finger{(113.9, 129.0)}  % Ooze 2
-\finger{(146, 127.0)}  % Giant Viper 1
-\finger{(176, 126)}  % Giant Viper 2
-\finger{(205.3, 129.4)}  % Spitting Drake
-\finger{(233.4, 127.7)}  % Rending Drake
+\finger{(47.9, 129.9)}  % Deep Terror 2
+\finger{(16.4, 129.9)}  % Deep Terror 1
+\finger{(80.4, 129.0)}  % Ooze 1
+\finger{(114.3, 129.0)}  % Ooze 2
+\finger{(146.4, 127.0)}  % Giant Viper 1
+\finger{(175.7, 126)}  % Giant Viper 2
+\finger{(205.0, 129.4)}  % Spitting Drake
+\finger{(232.9, 127.7)}  % Rending Drake
 
 \finger{(21.3, 77.2)}  % Inox Guard
 \finger{(61.1, 77.6)}  % Inox Priest
@@ -206,13 +234,13 @@
 \finger{(188, 54)}  % Black Imp 2
 \finger{(224.6, 83.1)}  % Lurker Soldier
 
-\finger{(14.9, 21.4)}  % Vermling Scout 1
-\finger{(44.3, 21.4)}  % Vermling Scout 2
-\finger{(73.8, 23.1)}  % Forest Imp 1
-\finger{(106, 26.9)}  % Forest Imp 2
-\finger{(137.9, 26.3)}  % City Guard
-\finger{(171, 20.1)}  % Ancient Artillery
-\finger{(202.9, 17.9)}  % Hound 1
+\finger{(15.9, 21.4)}  % Vermling Scout 1
+\finger{(45.2, 21.4)}  % Vermling Scout 2
+\finger{(74.6, 23.1)}  % Forest Imp 1
+\finger{(106.7, 26.9)}  % Forest Imp 2
+\finger{(138.5, 26.3)}  % City Guard
+\finger{(171.5, 20.1)}  % Ancient Artillery
+\finger{(203.3, 17.9)}  % Hound 1
 \finger{(233.7, 17.9)}  % Hound 2
 
 \end{tikzpicture}
@@ -274,7 +302,7 @@
   \tiltmonster[angle=-2]{Bandit Scout}
   \tiltmone[angle=-2]{Living Bones}
   \tiltmtwo[angle=-2]{Living Bones}
-  \tiltmonster{Cultist}
+  \tiltmonster[angle=0]{Cultist}
   \tiltmonster[angle=-1]{Living Corpse}
   \monster{Living Spirit}
   \monster{Night Demon}
