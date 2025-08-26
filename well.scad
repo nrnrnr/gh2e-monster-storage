@@ -59,12 +59,21 @@ module finger(x, y, radius=9.5) { // finger hole below monster stack
 }
 
 
-module thumb(x, y, depth, radius=9.5) { // thumb hole for opening glass
-  translate([0,0,depth - radius])
-    sphere(r=radius);
-  if (depth > radius) {
-    translate([0,0,depth - radius])
-      cylinder(r=radius, height = depth - radius + epsilon);
+module thumb(x, y, depth, radius=5.5) { // thumb hole for opening glass
+  // bottom of opening is at -depth in z
+  translate([0,0,radius - depth])
+    union() {
+//color("blue", 0.2)
+      sphere(r=radius);
+      rotate([0,90,0])
+        cylinder(r=radius, h=250); // points toward plus x
+      if (depth > radius) {
+//color("green", 0.7)
+        cylinder(r=radius, h = depth - radius + epsilon);
+//color("red", 0.2)
+    translate([0,-radius,0])
+      cube([250, 2 * radius, depth - radius + epsilon]);
+    }
   }
 }
 
@@ -86,5 +95,12 @@ module ears(dimens) {
 }
 
 
-frogs=99;
+module stop(length) { // low spot of one end at origin
+                      // higher end extending to negative x
+                      // length out to positive y
+  translate([0,length,0])
+  rotate([90,0,0])
+    linear_extrude(length)
+    polygon([[0,0],[-3,0],[-3,0.8]]);
+}
 
