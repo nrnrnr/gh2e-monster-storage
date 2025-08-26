@@ -112,3 +112,22 @@ number-%:V: $B/monsters%-numbered.jpg
 $B/%-numbered.jpg: $B/regions-%.txt %.jpg number-regions
 	./number-regions $B/regions-$stem.txt $stem.jpg $target
 
+# C embiggen implementation
+CC=gcc
+CFLAGS='-Wall -Wextra -std=c99 -O2'
+LDFLAGS=-lm
+
+embiggen:D: embiggen_main.o embiggen.o
+	$CC -o $target $prereq $LDFLAGS
+
+&.o:D: &.c
+	$CC $CFLAGS -c $stem.c
+
+embiggen.o: embiggen.h
+embiggen_main.o: embiggen.h
+
+
+clean:V:
+	rm -f embiggen *.o
+
+

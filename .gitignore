@@ -26,3 +26,4 @@ ppm*.int
 /tray.scad
 *.stl
 /outlines.scad
+/embiggen
