@@ -27,3 +27,4 @@ ppm*.int
 *.stl
 /outlines.scad
 /embiggen
+*.3mf
