@@ -45,11 +45,9 @@ coord_pair *calculate_offsets(double delta, int *count) {
             double squared = x * x + y * y;
             if (squared > 0 && squared <= d2) {
                 coords[n++] = (coord_pair){x, y};
-                if (y != 0) coords[n++] = (coord_pair){x, -y};
-                if (x != 0) {
-                    coords[n++] = (coord_pair){-x, y};
-                    if (y != 0) coords[n++] = (coord_pair){-x, -y};
-                }
+                coords[n++] = (coord_pair){x, -y};
+                coords[n++] = (coord_pair){-x, y};
+                coords[n++] = (coord_pair){-x, -y};
             }
         }
     }
