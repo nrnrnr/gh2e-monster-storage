@@ -33,18 +33,18 @@ module rail(length) {
 
 module tray_block(dimens, stop="left") {
   cube([dimens.x, dimens.y, caddy_height]);
-  translate([0, dimens.y, caddy_height - epsilon])
+  translate([0, dimens.y, caddy_height - epsilon]) // top rail
     rotate([0,0,-90])
     rail(dimens.x);
-  translate([dimens.x, 0, caddy_height - epsilon])
+  translate([dimens.x, 0, caddy_height - epsilon]) // bottom rail
     rotate([0,0,90])
     rail(dimens.x);
   if (stop == "left") {
     translate([0,0,caddy_height - epsilon])
-      cube ([1, dimens.y, 3 + epsilon]);
+      cube ([2, dimens.y, 3 + epsilon]);
   } else {
     translate([dimens.x,0,caddy_height - epsilon])
-      cube ([1, dimens.y, 3 + epsilon]);
+      cube ([2, dimens.y, 3 + epsilon]);
   }
 }
             

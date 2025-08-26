@@ -108,6 +108,72 @@ local function println(...)
   io.stdout:write '\n'
 end
 
+-- Calculate centroid of a polygon using the standard formula
+local function polygon_centroid(ring)
+  if #ring < 3 then return 0, 0 end -- degenerate polygon
+  
+  local area = 0
+  local cx, cy = 0, 0
+  
+  for i = 1, #ring do
+    local j = (i % #ring) + 1
+    local x1, y1 = ring[i][1], ring[i][2]  
+    local x2, y2 = ring[j][1], ring[j][2]
+    
+    local cross = x1 * y2 - x2 * y1
+    area = area + cross
+    cx = cx + (x1 + x2) * cross
+    cy = cy + (y1 + y2) * cross
+  end
+  
+  area = area / 2
+  if math.abs(area) < 1e-10 then return 0, 0 end -- avoid division by zero
+  
+  cx = cx / (6 * area)
+  cy = cy / (6 * area)
+  
+  return cx, cy
+end
+
+-- Calculate centroid of multiple polygons (weighted by area)
+local function polys_centroid(polys, transform_pt)
+  local total_area = 0
+  local weighted_cx, weighted_cy = 0, 0
+  
+  for _,rings in ipairs(polys) do
+    for _,ring in ipairs(rings) do
+      if #ring >= 3 then
+        -- Transform the ring points first
+        local transformed_ring = {}
+        for _,pt in ipairs(ring) do
+          local x, y = transform_pt(pt[1], pt[2])
+          transformed_ring[#transformed_ring+1] = {x, y}
+        end
+        
+        local cx, cy = polygon_centroid(transformed_ring)
+        
+        -- Calculate area for weighting
+        local area = 0
+        for i = 1, #transformed_ring do
+          local j = (i % #transformed_ring) + 1
+          local x1, y1 = transformed_ring[i][1], transformed_ring[i][2]
+          local x2, y2 = transformed_ring[j][1], transformed_ring[j][2]
+          area = area + (x1 * y2 - x2 * y1)
+        end
+        area = math.abs(area) / 2
+        
+        weighted_cx = weighted_cx + cx * area
+        weighted_cy = weighted_cy + cy * area
+        total_area = total_area + area
+      end
+    end
+  end
+  
+  if total_area < 1e-10 then return 0, 0 end
+  
+  return weighted_cx / total_area, weighted_cy / total_area
+end
+
 -- ----- emitters -----
 local function emit_tikz(polys, filename, dpi)
   -- emits a single \path with subpaths; caller can add even-odd fill rule when using it
@@ -187,11 +253,23 @@ local function emit_tikz(polys, filename, dpi)
   -- Output dimensions for original only
   output_dimensions(macro, "", min_x_orig, min_y_orig, max_x_orig, max_y_orig)
   
+  -- Calculate centroids for each orientation
+  local cx_orig, cy_orig = polys_centroid(polys, function(x, y) return x, y end)
+  local cx_90, cy_90 = polys_centroid(polys, function(x, y) return -y - min_x_90, x - min_y_90 end)
+  local cx_neg90, cy_neg90 = polys_centroid(polys, function(x, y) return y - min_x_neg90, -x - min_y_neg90 end)
+  local cx_180, cy_180 = polys_centroid(polys, function(x, y) return -x - min_x_180, -y - min_y_180 end)
+  
   -- Output path definitions
   println([[\defpath{%s}{%s}]], macro, table.concat(pieces, " "))
   println([[\defpath{%s angle=90}{%s}]], macro, table.concat(pieces_90, " "))
   println([[\defpath{%s angle=-90}{%s}]], macro, table.concat(pieces_neg90, " "))
   println([[\defpath{%s angle=180}{%s}]], macro, table.concat(pieces_180, " "))
+  
+  -- Output centroid definitions
+  println([[\defcentroid{%s}{(%g,%g)}]], macro, mm(cx_orig), mm(cy_orig))
+  println([[\defcentroid{%s angle=90}{(%g,%g)}]], macro, mm(cx_90), mm(cy_90))
+  println([[\defcentroid{%s angle=-90}{(%g,%g)}]], macro, mm(cx_neg90), mm(cy_neg90))  
+  println([[\defcentroid{%s angle=180}{(%g,%g)}]], macro, mm(cx_180), mm(cy_180))
 end
 
 local function emit_openscad(polys, filename, dpi)
